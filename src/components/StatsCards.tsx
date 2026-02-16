@@ -1,4 +1,5 @@
-import { TrendingDown, TrendingUp, Scale, Target, Activity } from "lucide-react";
+import { TrendingDown, TrendingUp, Scale, Activity, Target, Heart } from "lucide-react";
+import { calculateBMI, getBMICategory } from "@/lib/weight-storage";
 
 interface Stats {
   current: number;
@@ -10,17 +11,16 @@ interface Stats {
 
 interface Props {
   stats: Stats | null;
+  goalWeight?: number;
+  height?: number;
 }
 
-export default function StatsCards({ stats }: Props) {
+export default function StatsCards({ stats, goalWeight, height }: Props) {
   if (!stats) {
     return (
       <div className="grid grid-cols-2 gap-3">
         {[1, 2, 3, 4].map((i) => (
-          <div
-            key={i}
-            className="rounded-lg border bg-card p-4 opacity-50"
-          >
+          <div key={i} className="rounded-lg border bg-card p-4 opacity-50">
             <div className="h-3 w-16 rounded bg-muted mb-2" />
             <div className="h-6 w-12 rounded bg-muted" />
           </div>
@@ -28,6 +28,10 @@ export default function StatsCards({ stats }: Props) {
       </div>
     );
   }
+
+  const bmi = height ? calculateBMI(stats.current, height) : null;
+  const bmiCategory = bmi ? getBMICategory(bmi) : null;
+  const goalDiff = goalWeight ? stats.current - goalWeight : null;
 
   const cards = [
     {
@@ -38,26 +42,53 @@ export default function StatsCards({ stats }: Props) {
       sub: stats.diff !== 0 ? `${stats.diff > 0 ? "+" : ""}${stats.diff.toFixed(1)} kg` : null,
       subIcon: stats.diff <= 0 ? TrendingDown : TrendingUp,
     },
+    ...(bmi && bmiCategory
+      ? [
+          {
+            label: "IMC",
+            value: bmi.toFixed(1),
+            icon: Heart,
+            sub: bmiCategory.label,
+            subClassName: bmiCategory.color,
+          },
+        ]
+      : [
+          {
+            label: "Moyenne",
+            value: `${stats.avg.toFixed(1)} kg`,
+            icon: Activity,
+          },
+        ]),
+    ...(goalWeight && goalDiff !== null
+      ? [
+          {
+            label: "Objectif",
+            value: `${goalWeight.toFixed(1)} kg`,
+            icon: Target,
+            accent: goalDiff <= 0,
+            sub: `${goalDiff > 0 ? "+" : ""}${goalDiff.toFixed(1)} kg`,
+            subIcon: goalDiff <= 0 ? TrendingDown : TrendingUp,
+          },
+        ]
+      : [
+          {
+            label: "Min",
+            value: `${stats.min.toFixed(1)} kg`,
+            icon: TrendingDown,
+          },
+        ]),
     {
-      label: "Moyenne",
-      value: `${stats.avg.toFixed(1)} kg`,
-      icon: Activity,
-    },
-    {
-      label: "Min",
-      value: `${stats.min.toFixed(1)} kg`,
-      icon: TrendingDown,
-    },
-    {
-      label: "Max",
-      value: `${stats.max.toFixed(1)} kg`,
-      icon: TrendingUp,
+      label: bmi ? "Moyenne" : "Max",
+      value: bmi
+        ? `${stats.avg.toFixed(1)} kg`
+        : `${stats.max.toFixed(1)} kg`,
+      icon: bmi ? Activity : TrendingUp,
     },
   ];
 
   return (
     <div className="grid grid-cols-2 gap-3">
-      {cards.map((c) => (
+      {cards.map((c: any) => (
         <div
           key={c.label}
           className="animate-fade-in rounded-lg border bg-card p-4 transition-shadow hover:shadow-md"
@@ -68,8 +99,12 @@ export default function StatsCards({ stats }: Props) {
           </div>
           <p className="text-lg font-bold text-foreground">{c.value}</p>
           {c.sub && (
-            <div className={`flex items-center gap-1 mt-0.5 text-xs font-medium ${c.accent ? "text-stat-up" : "text-stat-down"}`}>
-              <c.subIcon className="h-3 w-3" />
+            <div
+              className={`flex items-center gap-1 mt-0.5 text-xs font-medium ${
+                c.subClassName || (c.accent ? "text-stat-up" : "text-stat-down")
+              }`}
+            >
+              {c.subIcon && <c.subIcon className="h-3 w-3" />}
               {c.sub}
             </div>
           )}

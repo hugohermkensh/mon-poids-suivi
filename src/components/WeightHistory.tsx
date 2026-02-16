@@ -1,14 +1,16 @@
 import { WeightEntry } from "@/lib/weight-storage";
-import { Trash2 } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
+import DeleteConfirmDialog from "./DeleteConfirmDialog";
+import EditEntryDialog from "./EditEntryDialog";
 
 interface Props {
   entries: WeightEntry[];
   onDelete: (id: string) => void;
+  onEdit: (id: string, updates: { date: string; weight: number; note?: string }) => void;
 }
 
-export default function WeightHistory({ entries, onDelete }: Props) {
+export default function WeightHistory({ entries, onDelete, onEdit }: Props) {
   if (entries.length === 0) {
     return (
       <p className="text-center text-sm text-muted-foreground py-8">
@@ -37,8 +39,13 @@ export default function WeightHistory({ entries, onDelete }: Props) {
               <p className="text-xs text-muted-foreground">
                 {format(parseISO(entry.date), "d MMMM yyyy", { locale: fr })}
               </p>
+              {entry.note && (
+                <p className="text-xs text-muted-foreground/70 italic mt-0.5">
+                  {entry.note}
+                </p>
+              )}
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
               {diff !== 0 && (
                 <span
                   className={`text-xs font-medium ${diff <= 0 ? "text-stat-up" : "text-stat-down"}`}
@@ -47,13 +54,8 @@ export default function WeightHistory({ entries, onDelete }: Props) {
                   {diff.toFixed(1)}
                 </span>
               )}
-              <button
-                onClick={() => onDelete(entry.id)}
-                className="text-muted-foreground/50 hover:text-destructive transition-colors"
-                aria-label="Supprimer"
-              >
-                <Trash2 className="h-4 w-4" />
-              </button>
+              <EditEntryDialog entry={entry} onSave={onEdit} />
+              <DeleteConfirmDialog onConfirm={() => onDelete(entry.id)} />
             </div>
           </div>
         );
