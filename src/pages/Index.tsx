@@ -65,7 +65,7 @@ const Index = () => {
             </div>
           </div>
           <div className="flex items-center gap-1">
-            <ExportButton entries={entries} chartRef={chartRef} />
+            <ExportButton entries={entries} chartRef={chartRef} goalWeight={settings.goalWeight} height={settings.height} />
             <SettingsDialog settings={settings} onSave={handleSaveSettings} />
             <ThemeToggle />
           </div>
