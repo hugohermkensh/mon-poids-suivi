@@ -24,13 +24,13 @@ export default function WeightForm({ onAdd }: Props) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-2">
+    <form onSubmit={handleSubmit} className="space-y-2 rounded-2xl border bg-card p-4 shadow-sm">
       <div className="flex gap-2">
         <Input
           type="date"
           value={date}
           onChange={(e) => setDate(e.target.value)}
-          className="flex-1 bg-card"
+          className="flex-1 h-11 rounded-xl bg-background/50 border-border/50 text-sm font-medium"
           max={today}
         />
         <Input
@@ -41,9 +41,9 @@ export default function WeightForm({ onAdd }: Props) {
           placeholder="Poids (kg)"
           value={weight}
           onChange={(e) => setWeight(e.target.value)}
-          className="flex-1 bg-card"
+          className="flex-1 h-11 rounded-xl bg-background/50 border-border/50 text-sm font-medium"
         />
-        <Button type="submit" size="icon" className="shrink-0">
+        <Button type="submit" size="icon" className="shrink-0 h-11 w-11 rounded-xl shadow-md shadow-primary/20">
           <Plus className="h-4 w-4" />
         </Button>
       </div>
@@ -51,7 +51,7 @@ export default function WeightForm({ onAdd }: Props) {
         placeholder="Note (optionnel) — ex: après sport"
         value={note}
         onChange={(e) => setNote(e.target.value)}
-        className="bg-card text-sm"
+        className="h-10 rounded-xl bg-background/50 border-border/50 text-sm"
       />
     </form>
   );
