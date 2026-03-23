@@ -50,22 +50,31 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="mx-auto max-w-lg px-4 py-8 space-y-6">
+      {/* Decorative gradient blob */}
+      <div className="pointer-events-none fixed inset-x-0 top-0 h-80 overflow-hidden">
+        <div className="absolute -top-40 left-1/2 h-80 w-[600px] -translate-x-1/2 rounded-full bg-primary/8 blur-3xl" />
+      </div>
+
+      <div className="relative mx-auto max-w-lg px-4 py-6 space-y-5">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
-              <Scale className="h-5 w-5 text-primary" />
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-primary/70 shadow-lg shadow-primary/20">
+              <Scale className="h-5 w-5 text-primary-foreground" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-foreground">Suivi de poids</h1>
-              <p className="text-xs text-muted-foreground">
-                {entries.length} entrée{entries.length !== 1 ? "s" : ""}
+              <h1 className="text-xl font-extrabold tracking-tight text-foreground">
+                Suivi de poids
+              </h1>
+              <p className="text-[11px] font-medium text-muted-foreground">
+                {entries.length === 0
+                  ? "Commencez votre suivi"
+                  : `${entries.length} entrée${entries.length !== 1 ? "s" : ""} enregistrée${entries.length !== 1 ? "s" : ""}`}
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-1">
-            <ExportButton entries={entries} chartRef={chartRef} />
+          <div className="flex items-center gap-0.5">
+            <ExportButton entries={entries} chartRef={chartRef} goalWeight={settings.goalWeight} height={settings.height} />
             <SettingsDialog settings={settings} onSave={handleSaveSettings} />
             <ThemeToggle />
           </div>
@@ -83,16 +92,25 @@ const Index = () => {
         )}
 
         {/* Chart */}
-        <div ref={chartRef} className="rounded-lg border bg-card p-4">
-          <h2 className="mb-3 text-sm font-semibold text-foreground">Évolution</h2>
+        <div ref={chartRef} className="rounded-2xl border bg-card p-4 shadow-sm">
+          <h2 className="mb-3 text-xs font-bold uppercase tracking-wider text-muted-foreground">
+            Évolution
+          </h2>
           <WeightChart entries={entries} goalWeight={settings.goalWeight} />
         </div>
 
         {/* History */}
         <div>
-          <h2 className="mb-3 text-sm font-semibold text-foreground">Historique</h2>
+          <h2 className="mb-3 text-xs font-bold uppercase tracking-wider text-muted-foreground">
+            Historique
+          </h2>
           <WeightHistory entries={entries} onDelete={handleDelete} onEdit={handleEdit} />
         </div>
+
+        {/* Footer */}
+        <p className="text-center text-[10px] text-muted-foreground/50 pb-4">
+          Suivi de poids · Vos données sont stockées localement
+        </p>
       </div>
     </div>
   );
