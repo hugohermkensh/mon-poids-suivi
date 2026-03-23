@@ -22,6 +22,7 @@ import GoalPrediction from "@/components/GoalPrediction";
 const Index = () => {
   const [entries, setEntries] = useState(getEntries);
   const [settings, setSettings] = useState<UserSettings>(getSettings);
+  const chartRef = useRef<HTMLDivElement>(null);
 
   const refresh = useCallback(() => setEntries(getEntries()), []);
 
