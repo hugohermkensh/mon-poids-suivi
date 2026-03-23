@@ -83,7 +83,7 @@ const Index = () => {
         )}
 
         {/* Chart */}
-        <div className="rounded-lg border bg-card p-4">
+        <div ref={chartRef} className="rounded-lg border bg-card p-4">
           <h2 className="mb-3 text-sm font-semibold text-foreground">Évolution</h2>
           <WeightChart entries={entries} goalWeight={settings.goalWeight} />
         </div>
