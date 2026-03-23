@@ -1,7 +1,6 @@
 import { WeightEntry, getMovingAverage } from "@/lib/weight-storage";
 import {
   Area,
-  AreaChart,
   CartesianGrid,
   Line,
   ResponsiveContainer,
@@ -14,7 +13,6 @@ import {
 import { format, parseISO, subDays, subMonths, subYears } from "date-fns";
 import { fr } from "date-fns/locale";
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
 
 interface Props {
   entries: WeightEntry[];
@@ -46,14 +44,16 @@ const CustomTooltip = ({ active, payload }: any) => {
   if (!active || !payload?.length) return null;
   const data = payload[0].payload;
   return (
-    <div className="rounded-lg border bg-card px-3 py-2 shadow-md">
-      <p className="text-xs text-muted-foreground">
-        {format(parseISO(data.date), "d MMM yyyy", { locale: fr })}
+    <div className="rounded-xl border bg-card/95 backdrop-blur-sm px-3 py-2.5 shadow-lg">
+      <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">
+        {format(parseISO(data.date), "EEEE d MMM", { locale: fr })}
       </p>
-      <p className="text-sm font-bold text-foreground">{data.weight} kg</p>
+      <p className="text-base font-extrabold text-foreground tracking-tight">
+        {data.weight} <span className="text-xs font-semibold text-muted-foreground">kg</span>
+      </p>
       {data.movingAvg && (
-        <p className="text-xs text-muted-foreground">
-          Moy. mobile : {data.movingAvg} kg
+        <p className="text-[10px] text-muted-foreground mt-0.5">
+          Moy. 7j : {data.movingAvg} kg
         </p>
       )}
     </div>
@@ -65,9 +65,10 @@ export default function WeightChart({ entries, goalWeight }: Props) {
 
   if (entries.length < 2) {
     return (
-      <div className="flex h-48 items-center justify-center rounded-lg border border-dashed bg-muted/30">
-        <p className="text-sm text-muted-foreground">
-          Ajoutez au moins 2 entrées pour voir la courbe
+      <div className="flex flex-col h-44 items-center justify-center rounded-xl border border-dashed border-border/60 bg-muted/20">
+        <span className="text-2xl mb-2">📈</span>
+        <p className="text-xs font-medium text-muted-foreground">
+          2 pesées minimum pour le graphique
         </p>
       </div>
     );
@@ -96,37 +97,41 @@ export default function WeightChart({ entries, goalWeight }: Props) {
 
   return (
     <div>
-      <div className="flex gap-1 mb-3">
+      {/* Filters */}
+      <div className="flex gap-1 mb-4 p-0.5 rounded-xl bg-muted/40 w-fit">
         {FILTERS.map((f) => (
-          <Button
+          <button
             key={f.key}
-            variant={filter === f.key ? "default" : "ghost"}
-            size="sm"
-            className="h-7 px-2.5 text-xs"
             onClick={() => setFilter(f.key)}
+            className={`px-3 py-1.5 rounded-lg text-[11px] font-bold tracking-wide transition-all duration-200 ${
+              filter === f.key
+                ? "bg-primary text-primary-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
+            }`}
           >
             {f.label}
-          </Button>
+          </button>
         ))}
       </div>
-      <ResponsiveContainer width="100%" height={260}>
-        <ComposedChart data={data} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
+
+      <ResponsiveContainer width="100%" height={240}>
+        <ComposedChart data={data} margin={{ top: 8, right: 8, left: -18, bottom: 0 }}>
           <defs>
             <linearGradient id="weightGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="hsl(var(--chart-primary))" stopOpacity={0.3} />
-              <stop offset="95%" stopColor="hsl(var(--chart-primary))" stopOpacity={0} />
+              <stop offset="0%" stopColor="hsl(var(--chart-primary))" stopOpacity={0.25} />
+              <stop offset="100%" stopColor="hsl(var(--chart-primary))" stopOpacity={0.02} />
             </linearGradient>
           </defs>
-          <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
+          <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} strokeOpacity={0.5} />
           <XAxis
             dataKey="label"
-            tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
+            tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))", fontWeight: 500 }}
             axisLine={false}
             tickLine={false}
           />
           <YAxis
             domain={[Math.floor(minW - padding), Math.ceil(maxW + padding)]}
-            tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
+            tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))", fontWeight: 500 }}
             axisLine={false}
             tickLine={false}
             unit=" kg"
@@ -137,9 +142,9 @@ export default function WeightChart({ entries, goalWeight }: Props) {
               y={goalWeight}
               stroke="hsl(var(--primary))"
               strokeDasharray="6 3"
-              strokeOpacity={0.6}
+              strokeOpacity={0.5}
               label={{
-                value: `Objectif: ${goalWeight} kg`,
+                value: `🎯 ${goalWeight} kg`,
                 position: "right",
                 fontSize: 10,
                 fill: "hsl(var(--muted-foreground))",
@@ -153,7 +158,7 @@ export default function WeightChart({ entries, goalWeight }: Props) {
             strokeWidth={2.5}
             fill="url(#weightGradient)"
             dot={{ r: 3, fill: "hsl(var(--chart-primary))", strokeWidth: 0 }}
-            activeDot={{ r: 5, fill: "hsl(var(--chart-primary))", strokeWidth: 2, stroke: "hsl(var(--card))" }}
+            activeDot={{ r: 5, fill: "hsl(var(--chart-primary))", strokeWidth: 2.5, stroke: "hsl(var(--card))" }}
           />
           <Line
             type="monotone"
@@ -161,7 +166,7 @@ export default function WeightChart({ entries, goalWeight }: Props) {
             stroke="hsl(var(--primary))"
             strokeWidth={1.5}
             strokeDasharray="4 2"
-            strokeOpacity={0.5}
+            strokeOpacity={0.4}
             dot={false}
             name="Moyenne mobile"
           />
