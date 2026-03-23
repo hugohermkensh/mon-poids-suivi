@@ -126,7 +126,7 @@ export function predictGoalDate(entries: WeightEntry[], goalWeight: number): str
 }
 
 export function exportToCSV(entries: WeightEntry[]): string {
-  const header = "Date,Poids (kg),Note";
-  const rows = entries.map((e) => `${e.date},${e.weight},"${e.note || ""}"`);
+  const header = "Date,Poids (kg)";
+  const rows = entries.map((e) => `${e.date},${e.weight}`);
   return [header, ...rows].join("\n");
 }

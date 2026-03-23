@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { Scale } from "lucide-react";
 import {
   getEntries,
@@ -22,6 +22,7 @@ import GoalPrediction from "@/components/GoalPrediction";
 const Index = () => {
   const [entries, setEntries] = useState(getEntries);
   const [settings, setSettings] = useState<UserSettings>(getSettings);
+  const chartRef = useRef<HTMLDivElement>(null);
 
   const refresh = useCallback(() => setEntries(getEntries()), []);
 
@@ -64,7 +65,7 @@ const Index = () => {
             </div>
           </div>
           <div className="flex items-center gap-1">
-            <ExportButton entries={entries} />
+            <ExportButton entries={entries} chartRef={chartRef} />
             <SettingsDialog settings={settings} onSave={handleSaveSettings} />
             <ThemeToggle />
           </div>
@@ -82,7 +83,7 @@ const Index = () => {
         )}
 
         {/* Chart */}
-        <div className="rounded-lg border bg-card p-4">
+        <div ref={chartRef} className="rounded-lg border bg-card p-4">
           <h2 className="mb-3 text-sm font-semibold text-foreground">Évolution</h2>
           <WeightChart entries={entries} goalWeight={settings.goalWeight} />
         </div>
