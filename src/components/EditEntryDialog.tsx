@@ -35,7 +35,7 @@ export default function EditEntryDialog({ entry, onSave }: Props) {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <button
-          className="h-7 w-7 rounded-lg flex items-center justify-center text-muted-foreground/40 hover:text-primary hover:bg-primary/10 transition-all"
+          className="h-7 w-7 rounded-lg flex items-center justify-center text-muted-foreground/40 hover:text-primary hover:bg-primary/10 transition-colors"
           aria-label="Modifier"
         >
           <Pencil className="h-3 w-3" />
@@ -43,38 +43,22 @@ export default function EditEntryDialog({ entry, onSave }: Props) {
       </DialogTrigger>
       <DialogContent className="max-w-sm rounded-2xl">
         <DialogHeader>
-          <DialogTitle className="font-extrabold">Modifier l'entrée</DialogTitle>
+          <DialogTitle className="font-bold">Modifier l'entrée</DialogTitle>
         </DialogHeader>
         <div className="space-y-4 pt-2">
-          <div className="space-y-2">
-            <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Date</Label>
+          <div className="space-y-1.5">
+            <Label className="text-xs font-semibold text-muted-foreground">Date</Label>
             <Input type="date" value={date} max={today} onChange={(e) => setDate(e.target.value)} className="h-11 rounded-xl" />
           </div>
-          <div className="space-y-2">
-            <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Poids (kg)</Label>
-            <Input
-              type="number"
-              step="0.1"
-              min="20"
-              max="300"
-              value={weight}
-              onChange={(e) => setWeight(e.target.value)}
-              className="h-11 rounded-xl"
-            />
+          <div className="space-y-1.5">
+            <Label className="text-xs font-semibold text-muted-foreground">Poids (kg)</Label>
+            <Input type="number" step="0.1" min="20" max="300" value={weight} onChange={(e) => setWeight(e.target.value)} className="h-11 rounded-xl" />
           </div>
-          <div className="space-y-2">
-            <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Note</Label>
-            <Input
-              placeholder="Ex: après sport"
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-              className="h-11 rounded-xl"
-            />
+          <div className="space-y-1.5">
+            <Label className="text-xs font-semibold text-muted-foreground">Note</Label>
+            <Input placeholder="Ex: après sport" value={note} onChange={(e) => setNote(e.target.value)} className="h-11 rounded-xl" />
           </div>
-          <Button
-            onClick={handleSave}
-            className="w-full h-11 rounded-xl font-bold shadow-md shadow-primary/20 transition-transform active:scale-[0.98]"
-          >
+          <Button onClick={handleSave} className="w-full h-11 rounded-xl font-bold">
             Enregistrer
           </Button>
         </div>

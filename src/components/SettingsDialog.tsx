@@ -37,25 +37,18 @@ export default function SettingsDialog({ settings, onSave }: Props) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="shrink-0 rounded-xl transition-transform active:scale-90"
-          aria-label="Paramètres"
-        >
+        <Button variant="ghost" size="icon" className="shrink-0 rounded-xl" aria-label="Paramètres">
           <Settings className="h-4 w-4" />
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-sm rounded-2xl">
         <DialogHeader>
-          <DialogTitle className="text-lg font-extrabold">Paramètres</DialogTitle>
+          <DialogTitle className="text-lg font-bold">Paramètres</DialogTitle>
         </DialogHeader>
-        <div className="space-y-5 pt-2">
-          <div className="space-y-2">
-            <Label className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">
-              <div className="h-5 w-5 rounded-md bg-primary/10 flex items-center justify-center">
-                <Target className="h-3 w-3 text-primary" />
-              </div>
+        <div className="space-y-4 pt-2">
+          <div className="space-y-1.5">
+            <Label className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
+              <Target className="h-3.5 w-3.5 text-primary" />
               Poids objectif (kg)
             </Label>
             <Input
@@ -69,11 +62,9 @@ export default function SettingsDialog({ settings, onSave }: Props) {
               className="h-11 rounded-xl"
             />
           </div>
-          <div className="space-y-2">
-            <Label className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">
-              <div className="h-5 w-5 rounded-md bg-primary/10 flex items-center justify-center">
-                <Ruler className="h-3 w-3 text-primary" />
-              </div>
+          <div className="space-y-1.5">
+            <Label className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
+              <Ruler className="h-3.5 w-3.5 text-primary" />
               Taille (cm)
             </Label>
             <Input
@@ -87,10 +78,7 @@ export default function SettingsDialog({ settings, onSave }: Props) {
               className="h-11 rounded-xl"
             />
           </div>
-          <Button
-            onClick={handleSave}
-            className="w-full h-11 rounded-xl font-bold shadow-md shadow-primary/20 transition-transform active:scale-[0.98]"
-          >
+          <Button onClick={handleSave} className="w-full h-11 rounded-xl font-bold">
             Enregistrer
           </Button>
         </div>

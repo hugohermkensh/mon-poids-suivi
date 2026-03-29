@@ -33,7 +33,7 @@ export default function ThemeToggle() {
       variant="ghost"
       size="icon"
       onClick={() => setDark(!dark)}
-      className="shrink-0 rounded-xl transition-transform active:scale-90"
+      className="shrink-0 rounded-xl"
       aria-label="Changer le thème"
     >
       {dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
