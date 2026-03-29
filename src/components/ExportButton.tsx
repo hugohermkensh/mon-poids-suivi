@@ -27,8 +27,7 @@ function captureChart(chartRef?: React.RefObject<HTMLDivElement>): Promise<strin
 
     const clone = svg.cloneNode(true) as SVGElement;
     clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
-    
-    // Inline computed styles for export
+
     const elements = clone.querySelectorAll("*");
     const originalElements = svg.querySelectorAll("*");
     elements.forEach((el, i) => {
@@ -82,35 +81,31 @@ export default function ExportButton({ entries, chartRef, goalWeight, height }: 
   };
 
   const handlePDF = () => {
-    // Open window SYNCHRONOUSLY to avoid popup blocker
     const win = window.open("", "_blank");
     if (!win) {
-      toast({ title: "Popup bloqué", description: "Autorisez les popups pour exporter en PDF.", variant: "destructive" });
+      toast({ title: "Popup bloqué", description: "Autorisez les popups pour exporter.", variant: "destructive" });
       return;
     }
 
-    // Show loading state
     win.document.write(`<html><head><title>Chargement...</title><style>
-      body{font-family:-apple-system,sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;background:#f8fffe}
-      .loader{text-align:center;color:#0d9488}
-      .spinner{width:40px;height:40px;border:3px solid #e0f2f1;border-top-color:#0d9488;border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 16px}
-      @keyframes spin{to{transform:rotate(360deg)}}
-    </style></head><body><div class="loader"><div class="spinner"></div><p>Préparation du rapport...</p></div></body></html>`);
+      body{font-family:-apple-system,sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;background:#fafafa}
+      .l{text-align:center;color:#059669}
+      .s{width:32px;height:32px;border:3px solid #e5e7eb;border-top-color:#059669;border-radius:50%;animation:r 0.7s linear infinite;margin:0 auto 12px}
+      @keyframes r{to{transform:rotate(360deg)}}
+    </style></head><body><div class="l"><div class="s"></div><p style="font-size:13px">Préparation...</p></div></body></html>`);
 
-    // Capture chart asynchronously then write content
-    captureChart(chartRef).then((chartDataUrl) => {
+    captureChart(chartRef).then((chartImg) => {
       const stats = getStats(entries);
       const bmi = stats && height ? calculateBMI(stats.current, height) : null;
       const bmiCat = bmi ? getBMICategory(bmi) : null;
 
-      const content = buildPDFContent(entries, stats, bmi, bmiCat, goalWeight, chartDataUrl);
       win.document.open();
-      win.document.write(content);
+      win.document.write(buildPDF(entries, stats, bmi, bmiCat, goalWeight, chartImg));
       win.document.close();
-      setTimeout(() => win.print(), 600);
+      setTimeout(() => win.print(), 500);
     });
 
-    toast({ title: "Impression PDF lancée !" });
+    toast({ title: "PDF en cours de génération..." });
   };
 
   if (entries.length === 0) return null;
@@ -122,10 +117,10 @@ export default function ExportButton({ entries, chartRef, goalWeight, height }: 
           <Download className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="min-w-[180px]">
+      <DropdownMenuContent align="end" className="min-w-[170px]">
         <DropdownMenuItem onClick={handleCSV} className="gap-2">
           <Table2 className="h-4 w-4 text-muted-foreground" />
-          Exporter en CSV
+          Exporter CSV
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handlePDF} className="gap-2">
@@ -137,116 +132,114 @@ export default function ExportButton({ entries, chartRef, goalWeight, height }: 
   );
 }
 
-function buildPDFContent(
+function buildPDF(
   entries: WeightEntry[],
   stats: ReturnType<typeof getStats>,
   bmi: number | null,
   bmiCat: { label: string; color: string } | null,
   goalWeight: number | undefined,
-  chartDataUrl: string
+  chartImg: string
 ) {
+  const dateStr = format(new Date(), "d MMMM yyyy", { locale: fr });
+  const timeStr = format(new Date(), "dd/MM/yyyy 'à' HH:mm", { locale: fr });
+
   return `<!DOCTYPE html>
-<html><head><meta charset="utf-8"><title>Suivi de poids — Rapport</title>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<html lang="fr"><head><meta charset="utf-8"><title>Suivi de poids — Rapport</title>
 <style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
   *{margin:0;padding:0;box-sizing:border-box}
-  body{font-family:'Plus Jakarta Sans',-apple-system,sans-serif;padding:48px;color:#1a2b2f;background:#fff;max-width:800px;margin:0 auto}
+  body{font-family:'Inter',-apple-system,sans-serif;color:#111827;background:#fff;max-width:720px;margin:0 auto;padding:40px 48px}
   
-  .header{display:flex;align-items:center;gap:20px;margin-bottom:36px;padding-bottom:28px;border-bottom:3px solid #0d9488}
-  .logo{width:52px;height:52px;background:linear-gradient(135deg,#0d9488,#14b8a6);border-radius:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-  .logo svg{width:26px;height:26px;stroke:white;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-  .header h1{font-size:24px;font-weight:800;color:#0f2b2f;letter-spacing:-0.5px}
-  .header p{font-size:13px;color:#6b8a8e;font-weight:500;margin-top:3px}
-
-  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:32px}
-  .stat{background:linear-gradient(135deg,#f0fdfa,#e6fffa);border:1px solid #b2f5ea;border-radius:14px;padding:16px 18px}
-  .stat-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:#6b8a8e;margin-bottom:6px}
-  .stat-val{font-size:22px;font-weight:800;color:#0f2b2f;line-height:1}
-  .stat-unit{font-size:12px;font-weight:500;color:#6b8a8e;margin-left:2px}
-  .stat-sub{font-size:11px;font-weight:700;margin-top:6px;display:inline-block;padding:2px 8px;border-radius:20px}
-  .sub-up{color:#059669;background:#d1fae5}
-  .sub-down{color:#dc2626;background:#fee2e2}
-  .sub-neutral{color:#6b8a8e;background:#f0fdfa}
-
-  .section{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#0d9488;margin-bottom:18px;display:flex;align-items:center;gap:10px}
-  .section::after{content:'';flex:1;height:2px;background:linear-gradient(to right,#b2f5ea,transparent)}
-
-  .chart-box{margin-bottom:32px;background:#fafffe;border:1px solid #e0f2f1;border-radius:18px;padding:24px;box-shadow:0 2px 8px rgba(13,148,136,0.06)}
-  .chart-box img{width:100%;border-radius:10px;display:block}
-
-  table{width:100%;border-collapse:separate;border-spacing:0;border-radius:14px;overflow:hidden;border:1px solid #e0f2f1;box-shadow:0 2px 8px rgba(13,148,136,0.04)}
-  thead th{background:linear-gradient(135deg,#0d9488,#0f766e);color:white;padding:14px 18px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;text-align:left}
-  tbody tr:nth-child(even){background:#f0fdfa}
-  tbody tr:hover{background:#e6fffa}
-  tbody td{padding:12px 18px;font-size:13px;border-bottom:1px solid #e0f2f1}
-  td:first-child{font-weight:500;color:#6b8a8e;white-space:nowrap}
-  td:nth-child(2){font-weight:800;color:#0f2b2f;font-size:14px}
-  td:nth-child(3){font-weight:700;font-size:12px}
-  .up{color:#059669}.down{color:#dc2626}.neutral{color:#94a3b8}
-
-  .footer{margin-top:36px;padding-top:20px;border-top:2px solid #e0f2f1;display:flex;justify-content:space-between;align-items:center}
-  .footer p{font-size:10px;color:#9cb3b6;font-weight:500}
-  .footer .brand{color:#0d9488;font-weight:700}
-
-  @media print{body{padding:24px}table{page-break-inside:auto}tr{page-break-inside:avoid}}
+  .hdr{display:flex;align-items:center;gap:16px;margin-bottom:32px;padding-bottom:24px;border-bottom:2px solid #059669}
+  .logo{width:44px;height:44px;background:#059669;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .logo svg{width:22px;height:22px;stroke:white;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .hdr h1{font-size:20px;font-weight:800;color:#111827}
+  .hdr p{font-size:12px;color:#6b7280;margin-top:2px}
+  
+  .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:28px}
+  .card{background:#f9fafb;border:1px solid #e5e7eb;border-radius:12px;padding:14px 16px}
+  .card-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:#6b7280;margin-bottom:4px}
+  .card-val{font-size:20px;font-weight:800;color:#111827}
+  .card-unit{font-size:11px;font-weight:500;color:#9ca3af}
+  .card-sub{font-size:10px;font-weight:600;margin-top:4px}
+  .green{color:#059669} .red{color:#dc2626} .gray{color:#6b7280}
+  
+  .section{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:#059669;margin:28px 0 14px;display:flex;align-items:center;gap:10px}
+  .section::after{content:'';flex:1;height:1px;background:#e5e7eb}
+  
+  .chart{margin-bottom:28px;background:#fafafa;border:1px solid #e5e7eb;border-radius:14px;padding:20px}
+  .chart img{width:100%;display:block;border-radius:8px}
+  
+  table{width:100%;border-collapse:collapse;border-radius:12px;overflow:hidden;border:1px solid #e5e7eb;font-size:12px}
+  thead{background:#059669}
+  th{color:white;padding:10px 16px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;text-align:left}
+  td{padding:10px 16px;border-bottom:1px solid #f3f4f6}
+  tr:nth-child(even){background:#f9fafb}
+  .w-col{font-weight:700;color:#111827}
+  
+  .foot{margin-top:32px;padding-top:16px;border-top:1px solid #e5e7eb;display:flex;justify-content:space-between}
+  .foot p{font-size:9px;color:#9ca3af}
+  .foot .brand{color:#059669;font-weight:700}
+  
+  @media print{body{padding:20px 24px;max-width:none}table{page-break-inside:auto}tr{page-break-inside:avoid}}
 </style></head><body>
 
-<div class="header">
+<div class="hdr">
   <div class="logo">
     <svg viewBox="0 0 24 24"><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="M7 21h10"/><path d="M12 3v18"/><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/></svg>
   </div>
   <div>
     <h1>Suivi de poids</h1>
-    <p>Rapport du ${format(new Date(), "d MMMM yyyy", { locale: fr })} · ${entries.length} entrée${entries.length !== 1 ? "s" : ""} enregistrée${entries.length !== 1 ? "s" : ""}</p>
+    <p>Rapport du ${dateStr} — ${entries.length} pesée${entries.length !== 1 ? "s" : ""}</p>
   </div>
 </div>
 
 ${stats ? `
-<div class="stats">
-  <div class="stat">
-    <div class="stat-label">Poids actuel</div>
-    <div class="stat-val">${stats.current.toFixed(1)}<span class="stat-unit">kg</span></div>
-    <div class="stat-sub ${stats.diff <= 0 ? 'sub-up' : 'sub-down'}">${stats.diff > 0 ? '↑' : '↓'} ${Math.abs(stats.diff).toFixed(1)} kg</div>
+<div class="grid">
+  <div class="card">
+    <div class="card-label">Poids actuel</div>
+    <div class="card-val">${stats.current.toFixed(1)} <span class="card-unit">kg</span></div>
+    <div class="card-sub ${stats.diff <= 0 ? 'green' : 'red'}">${stats.diff > 0 ? '+' : ''}${stats.diff.toFixed(1)} kg</div>
   </div>
-  <div class="stat">
-    <div class="stat-label">Moyenne</div>
-    <div class="stat-val">${stats.avg.toFixed(1)}<span class="stat-unit">kg</span></div>
-    <div class="stat-sub sub-neutral">sur ${entries.length} pesées</div>
+  <div class="card">
+    <div class="card-label">Moyenne</div>
+    <div class="card-val">${stats.avg.toFixed(1)} <span class="card-unit">kg</span></div>
+    <div class="card-sub gray">${entries.length} pesées</div>
   </div>
-  <div class="stat">
-    <div class="stat-label">Amplitude</div>
-    <div class="stat-val">${stats.min.toFixed(1)}<span class="stat-unit">→ ${stats.max.toFixed(1)}</span></div>
-    <div class="stat-sub sub-neutral">Δ ${(stats.max - stats.min).toFixed(1)} kg</div>
+  <div class="card">
+    <div class="card-label">Amplitude</div>
+    <div class="card-val">${(stats.max - stats.min).toFixed(1)} <span class="card-unit">kg</span></div>
+    <div class="card-sub gray">${stats.min.toFixed(1)} → ${stats.max.toFixed(1)}</div>
   </div>
-  <div class="stat">
-    <div class="stat-label">${bmi ? 'IMC' : (goalWeight ? 'Objectif' : 'Écart')}</div>
-    <div class="stat-val">${bmi ? bmi.toFixed(1) : (goalWeight ? goalWeight.toFixed(1) : (stats.max - stats.min).toFixed(1))}<span class="stat-unit">${bmi ? '' : 'kg'}</span></div>
-    <div class="stat-sub ${bmiCat ? (bmiCat.label === 'Normal' ? 'sub-up' : 'sub-down') : 'sub-neutral'}">${bmiCat ? bmiCat.label : (goalWeight ? `${(stats.current - goalWeight) > 0 ? '+' : ''}${(stats.current - goalWeight).toFixed(1)} kg` : 'total')}</div>
+  <div class="card">
+    <div class="card-label">${bmi ? 'IMC' : (goalWeight ? 'Objectif' : 'Max')}</div>
+    <div class="card-val">${bmi ? bmi.toFixed(1) : (goalWeight ? goalWeight.toFixed(1) : stats.max.toFixed(1))} <span class="card-unit">${bmi ? '' : 'kg'}</span></div>
+    <div class="card-sub ${bmiCat ? (bmiCat.label === 'Normal' ? 'green' : 'red') : 'gray'}">${bmiCat ? bmiCat.label : (goalWeight ? `${(stats.current - goalWeight) > 0 ? '+' : ''}${(stats.current - goalWeight).toFixed(1)} kg restant` : '')}</div>
   </div>
 </div>` : ''}
 
-${chartDataUrl ? `
+${chartImg ? `
 <div class="section">Évolution</div>
-<div class="chart-box"><img src="${chartDataUrl}" alt="Graphique" /></div>` : ''}
+<div class="chart"><img src="${chartImg}" alt="Graphique d'évolution" /></div>` : ''}
 
-<div class="section">Historique détaillé</div>
+<div class="section">Historique</div>
 <table>
   <thead><tr><th>Date</th><th>Poids</th><th>Variation</th></tr></thead>
   <tbody>
     ${[...entries].reverse().map((e, i, arr) => {
       const prev = arr[i + 1];
       const diff = prev ? e.weight - prev.weight : 0;
-      const cls = i === arr.length - 1 ? 'neutral' : (diff <= 0 ? 'up' : 'down');
-      const sym = i === arr.length - 1 ? '—' : (diff > 0 ? '↑' : diff < 0 ? '↓' : '→');
-      const str = i === arr.length - 1 ? '—' : `${sym} ${Math.abs(diff).toFixed(1)} kg`;
-      return `<tr><td>${format(parseISO(e.date), "d MMM yyyy", { locale: fr })}</td><td>${e.weight.toFixed(1)} kg</td><td class="${cls}">${str}</td></tr>`;
+      const cls = !prev ? 'gray' : (diff <= 0 ? 'green' : 'red');
+      const sym = !prev ? '—' : (diff > 0 ? '↑' : diff < 0 ? '↓' : '→');
+      const str = !prev ? '—' : `${sym} ${Math.abs(diff).toFixed(1)} kg`;
+      return `<tr><td>${format(parseISO(e.date), "d MMM yyyy", { locale: fr })}</td><td class="w-col">${e.weight.toFixed(1)} kg</td><td class="${cls}">${str}</td></tr>`;
     }).join("")}
   </tbody>
 </table>
 
-<div class="footer">
-  <p><span class="brand">Suivi de poids</span> · Rapport généré automatiquement</p>
-  <p>${format(new Date(), "dd/MM/yyyy 'à' HH:mm", { locale: fr })}</p>
+<div class="foot">
+  <p><span class="brand">Suivi de poids</span> — Rapport généré automatiquement</p>
+  <p>${timeStr}</p>
 </div>
 
 </body></html>`;
