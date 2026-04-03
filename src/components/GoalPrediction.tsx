@@ -1,6 +1,6 @@
 import { format, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Target } from "lucide-react";
+import { Target, Calendar } from "lucide-react";
 import { predictGoalDate } from "@/lib/weight-storage";
 import type { WeightEntry } from "@/lib/weight-storage";
 
@@ -18,21 +18,22 @@ export default function GoalPrediction({ entries, goalWeight }: Props) {
   );
 
   return (
-    <div className="rounded-2xl border border-primary/15 bg-primary/5 p-4">
-      <div className="flex items-center gap-3">
-        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary shrink-0">
-          <Target className="h-4 w-4 text-primary-foreground" />
+    <div className="glass-card rounded-2xl border-primary/15 bg-gradient-to-r from-primary/6 to-transparent p-4">
+      <div className="flex items-center gap-3.5">
+        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary/80 shadow-md shadow-primary/20 shrink-0">
+          <Target className="h-5 w-5 text-primary-foreground" />
         </div>
-        <div>
-          <p className="text-[10px] font-semibold uppercase tracking-wider text-primary mb-0.5">
+        <div className="flex-1">
+          <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-primary mb-1">
             Prédiction objectif
           </p>
-          <p className="text-sm font-bold text-foreground">
+          <p className="text-sm font-black text-foreground">
             {format(parseISO(targetDate), "d MMMM yyyy", { locale: fr })}
-            <span className="text-xs font-medium text-muted-foreground ml-2">
-              dans {daysLeft} jours
-            </span>
           </p>
+        </div>
+        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-primary/10">
+          <Calendar className="h-3 w-3 text-primary" />
+          <span className="text-xs font-bold text-primary">{daysLeft}j</span>
         </div>
       </div>
     </div>

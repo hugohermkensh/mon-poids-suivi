@@ -43,12 +43,14 @@ export default function SettingsDialog({ settings, onSave }: Props) {
       </DialogTrigger>
       <DialogContent className="max-w-sm rounded-2xl">
         <DialogHeader>
-          <DialogTitle className="text-lg font-bold">Paramètres</DialogTitle>
+          <DialogTitle className="text-lg font-black">Paramètres</DialogTitle>
         </DialogHeader>
-        <div className="space-y-4 pt-2">
-          <div className="space-y-1.5">
-            <Label className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
-              <Target className="h-3.5 w-3.5 text-primary" />
+        <div className="space-y-5 pt-2">
+          <div className="space-y-2">
+            <Label className="flex items-center gap-2 text-xs font-bold text-muted-foreground">
+              <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-primary/10">
+                <Target className="h-3 w-3 text-primary" />
+              </div>
               Poids objectif (kg)
             </Label>
             <Input
@@ -59,12 +61,14 @@ export default function SettingsDialog({ settings, onSave }: Props) {
               placeholder="Ex: 70"
               value={goalWeight}
               onChange={(e) => setGoalWeight(e.target.value)}
-              className="h-11 rounded-xl"
+              className="h-12 rounded-xl bg-muted/50 border-0"
             />
           </div>
-          <div className="space-y-1.5">
-            <Label className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
-              <Ruler className="h-3.5 w-3.5 text-primary" />
+          <div className="space-y-2">
+            <Label className="flex items-center gap-2 text-xs font-bold text-muted-foreground">
+              <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-primary/10">
+                <Ruler className="h-3 w-3 text-primary" />
+              </div>
               Taille (cm)
             </Label>
             <Input
@@ -75,10 +79,13 @@ export default function SettingsDialog({ settings, onSave }: Props) {
               placeholder="Ex: 175"
               value={height}
               onChange={(e) => setHeight(e.target.value)}
-              className="h-11 rounded-xl"
+              className="h-12 rounded-xl bg-muted/50 border-0"
             />
           </div>
-          <Button onClick={handleSave} className="w-full h-11 rounded-xl font-bold">
+          <Button
+            onClick={handleSave}
+            className="w-full h-12 rounded-xl font-bold shadow-md shadow-primary/20"
+          >
             Enregistrer
           </Button>
         </div>

@@ -49,26 +49,30 @@ const Index = () => {
   const stats = getStats(entries);
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="mx-auto max-w-lg px-4 py-6 space-y-5">
+    <div className="min-h-screen bg-background relative overflow-hidden">
+      {/* Decorative blobs */}
+      <div className="pointer-events-none absolute -top-32 -right-32 w-80 h-80 rounded-full bg-primary/5 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-40 -left-40 w-96 h-96 rounded-full bg-primary/3 blur-3xl" />
+
+      <div className="relative mx-auto max-w-lg px-4 py-8 space-y-6">
         {/* Header */}
-        <header className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary shadow-lg shadow-primary/25">
-              <Scale className="h-5 w-5 text-primary-foreground" />
+        <header className="flex items-center justify-between animate-slide-up">
+          <div className="flex items-center gap-3.5">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-primary/80 shadow-lg shadow-primary/20">
+              <Scale className="h-5.5 w-5.5 text-primary-foreground" strokeWidth={2.5} />
             </div>
             <div>
-              <h1 className="text-lg font-extrabold tracking-tight text-foreground">
+              <h1 className="text-xl font-black tracking-tight text-foreground">
                 Suivi de poids
               </h1>
-              <p className="text-[11px] font-medium text-muted-foreground mt-0.5">
+              <p className="text-xs font-medium text-muted-foreground mt-0.5">
                 {entries.length === 0
                   ? "Commencez votre suivi"
                   : `${entries.length} pesée${entries.length !== 1 ? "s" : ""} enregistrée${entries.length !== 1 ? "s" : ""}`}
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-0.5">
+          <div className="flex items-center gap-1">
             <ExportButton entries={entries} chartRef={chartRef} goalWeight={settings.goalWeight} height={settings.height} />
             <SettingsDialog settings={settings} onSave={handleSaveSettings} />
             <ThemeToggle />
@@ -76,26 +80,26 @@ const Index = () => {
         </header>
 
         {/* Form */}
-        <div className="animate-slide-up" style={{ animationDelay: "0ms" }}>
+        <div className="animate-slide-up" style={{ animationDelay: "60ms" }}>
           <WeightForm onAdd={handleAdd} />
         </div>
 
         {/* Stats */}
-        <div className="animate-slide-up" style={{ animationDelay: "50ms" }}>
+        <div className="animate-slide-up" style={{ animationDelay: "120ms" }}>
           <StatsCards stats={stats} goalWeight={settings.goalWeight} height={settings.height} />
         </div>
 
         {/* Goal Prediction */}
         {settings.goalWeight && entries.length >= 7 && (
-          <div className="animate-slide-up" style={{ animationDelay: "100ms" }}>
+          <div className="animate-slide-up" style={{ animationDelay: "180ms" }}>
             <GoalPrediction entries={entries} goalWeight={settings.goalWeight} />
           </div>
         )}
 
         {/* Chart */}
-        <div className="animate-slide-up" style={{ animationDelay: "150ms" }}>
-          <section ref={chartRef} className="rounded-2xl border bg-card p-4">
-            <h2 className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-3">
+        <div className="animate-slide-up" style={{ animationDelay: "240ms" }}>
+          <section ref={chartRef} className="glass-card rounded-2xl p-5">
+            <h2 className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground mb-4">
               Évolution
             </h2>
             <WeightChart entries={entries} goalWeight={settings.goalWeight} />
@@ -103,9 +107,9 @@ const Index = () => {
         </div>
 
         {/* History */}
-        <div className="animate-slide-up" style={{ animationDelay: "200ms" }}>
+        <div className="animate-slide-up" style={{ animationDelay: "300ms" }}>
           <section>
-            <h2 className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-3 px-1">
+            <h2 className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground mb-3 px-1">
               Historique
             </h2>
             <WeightHistory entries={entries} onDelete={handleDelete} onEdit={handleEdit} />
@@ -113,8 +117,8 @@ const Index = () => {
         </div>
 
         {/* Footer */}
-        <footer className="text-center pb-6 pt-2">
-          <p className="text-[10px] font-medium text-muted-foreground/40">
+        <footer className="text-center pb-8 pt-4 animate-fade-in" style={{ animationDelay: "400ms" }}>
+          <p className="text-[10px] font-medium text-muted-foreground/30 tracking-wide">
             Données stockées localement sur votre appareil
           </p>
         </footer>
