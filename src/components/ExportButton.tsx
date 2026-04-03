@@ -36,8 +36,10 @@ function captureChart(chartRef?: React.RefObject<HTMLDivElement>): Promise<strin
         const computed = window.getComputedStyle(orig);
         const fill = computed.getPropertyValue("fill");
         const stroke = computed.getPropertyValue("stroke");
+        const opacity = computed.getPropertyValue("opacity");
         if (fill && fill !== "none") (el as SVGElement).style.fill = fill;
         if (stroke && stroke !== "none") (el as SVGElement).style.stroke = stroke;
+        if (opacity) (el as SVGElement).style.opacity = opacity;
       }
     });
 
@@ -81,6 +83,7 @@ export default function ExportButton({ entries, chartRef, goalWeight, height }: 
   };
 
   const handlePDF = () => {
+    // Open window synchronously to avoid popup blocker
     const win = window.open("", "_blank");
     if (!win) {
       toast({ title: "Popup bloqué", description: "Autorisez les popups pour exporter.", variant: "destructive" });
@@ -89,10 +92,10 @@ export default function ExportButton({ entries, chartRef, goalWeight, height }: 
 
     win.document.write(`<html><head><title>Chargement...</title><style>
       body{font-family:-apple-system,sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;background:#fafafa}
-      .l{text-align:center;color:#059669}
-      .s{width:32px;height:32px;border:3px solid #e5e7eb;border-top-color:#059669;border-radius:50%;animation:r 0.7s linear infinite;margin:0 auto 12px}
+      .l{text-align:center;color:#0d9488}
+      .s{width:28px;height:28px;border:3px solid #e5e7eb;border-top-color:#0d9488;border-radius:50%;animation:r 0.6s linear infinite;margin:0 auto 12px}
       @keyframes r{to{transform:rotate(360deg)}}
-    </style></head><body><div class="l"><div class="s"></div><p style="font-size:13px">Préparation...</p></div></body></html>`);
+    </style></head><body><div class="l"><div class="s"></div><p style="font-size:13px;font-weight:500">Génération du rapport...</p></div></body></html>`);
 
     captureChart(chartRef).then((chartImg) => {
       const stats = getStats(entries);
@@ -100,12 +103,12 @@ export default function ExportButton({ entries, chartRef, goalWeight, height }: 
       const bmiCat = bmi ? getBMICategory(bmi) : null;
 
       win.document.open();
-      win.document.write(buildPDF(entries, stats, bmi, bmiCat, goalWeight, chartImg));
+      win.document.write(buildPDFHtml(entries, stats, bmi, bmiCat, goalWeight, chartImg));
       win.document.close();
-      setTimeout(() => win.print(), 500);
+      setTimeout(() => win.print(), 400);
     });
 
-    toast({ title: "PDF en cours de génération..." });
+    toast({ title: "Rapport en préparation..." });
   };
 
   if (entries.length === 0) return null;
@@ -117,13 +120,13 @@ export default function ExportButton({ entries, chartRef, goalWeight, height }: 
           <Download className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="min-w-[170px]">
-        <DropdownMenuItem onClick={handleCSV} className="gap-2">
+      <DropdownMenuContent align="end" className="min-w-[180px] rounded-xl">
+        <DropdownMenuItem onClick={handleCSV} className="gap-2.5 rounded-lg">
           <Table2 className="h-4 w-4 text-muted-foreground" />
           Exporter CSV
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={handlePDF} className="gap-2">
+        <DropdownMenuItem onClick={handlePDF} className="gap-2.5 rounded-lg">
           <FileText className="h-4 w-4 text-muted-foreground" />
           Imprimer / PDF
         </DropdownMenuItem>
@@ -132,7 +135,7 @@ export default function ExportButton({ entries, chartRef, goalWeight, height }: 
   );
 }
 
-function buildPDF(
+function buildPDFHtml(
   entries: WeightEntry[],
   stats: ReturnType<typeof getStats>,
   bmi: number | null,
@@ -146,46 +149,47 @@ function buildPDF(
   return `<!DOCTYPE html>
 <html lang="fr"><head><meta charset="utf-8"><title>Suivi de poids — Rapport</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
   *{margin:0;padding:0;box-sizing:border-box}
-  body{font-family:'Inter',-apple-system,sans-serif;color:#111827;background:#fff;max-width:720px;margin:0 auto;padding:40px 48px}
-  
-  .hdr{display:flex;align-items:center;gap:16px;margin-bottom:32px;padding-bottom:24px;border-bottom:2px solid #059669}
-  .logo{width:44px;height:44px;background:#059669;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-  .logo svg{width:22px;height:22px;stroke:white;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-  .hdr h1{font-size:20px;font-weight:800;color:#111827}
-  .hdr p{font-size:12px;color:#6b7280;margin-top:2px}
-  
-  .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:28px}
-  .card{background:#f9fafb;border:1px solid #e5e7eb;border-radius:12px;padding:14px 16px}
-  .card-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:#6b7280;margin-bottom:4px}
-  .card-val{font-size:20px;font-weight:800;color:#111827}
-  .card-unit{font-size:11px;font-weight:500;color:#9ca3af}
-  .card-sub{font-size:10px;font-weight:600;margin-top:4px}
-  .green{color:#059669} .red{color:#dc2626} .gray{color:#6b7280}
-  
-  .section{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:#059669;margin:28px 0 14px;display:flex;align-items:center;gap:10px}
-  .section::after{content:'';flex:1;height:1px;background:#e5e7eb}
-  
-  .chart{margin-bottom:28px;background:#fafafa;border:1px solid #e5e7eb;border-radius:14px;padding:20px}
-  .chart img{width:100%;display:block;border-radius:8px}
-  
-  table{width:100%;border-collapse:collapse;border-radius:12px;overflow:hidden;border:1px solid #e5e7eb;font-size:12px}
-  thead{background:#059669}
-  th{color:white;padding:10px 16px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;text-align:left}
-  td{padding:10px 16px;border-bottom:1px solid #f3f4f6}
-  tr:nth-child(even){background:#f9fafb}
-  .w-col{font-weight:700;color:#111827}
-  
-  .foot{margin-top:32px;padding-top:16px;border-top:1px solid #e5e7eb;display:flex;justify-content:space-between}
-  .foot p{font-size:9px;color:#9ca3af}
-  .foot .brand{color:#059669;font-weight:700}
-  
-  @media print{body{padding:20px 24px;max-width:none}table{page-break-inside:auto}tr{page-break-inside:avoid}}
+  body{font-family:'Inter',-apple-system,sans-serif;color:#0f172a;background:#fff;max-width:700px;margin:0 auto;padding:44px 48px}
+
+  .header{display:flex;align-items:center;gap:18px;margin-bottom:36px;padding-bottom:28px;border-bottom:3px solid #0d9488}
+  .logo-box{width:48px;height:48px;background:linear-gradient(135deg,#0d9488,#14b8a6);border-radius:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 4px 12px rgba(13,148,136,0.25)}
+  .logo-box svg{width:24px;height:24px;stroke:white;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .header h1{font-size:22px;font-weight:900;color:#0f172a;letter-spacing:-0.3px}
+  .header p{font-size:12px;color:#64748b;margin-top:3px;font-weight:500}
+
+  .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:32px}
+  .stat-card{background:#f8fafc;border:1px solid #e2e8f0;border-radius:14px;padding:16px 18px}
+  .stat-label{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#94a3b8;margin-bottom:6px}
+  .stat-value{font-size:24px;font-weight:900;color:#0f172a;letter-spacing:-0.5px}
+  .stat-unit{font-size:11px;font-weight:600;color:#94a3b8}
+  .stat-sub{font-size:10px;font-weight:700;margin-top:5px}
+  .green{color:#0d9488} .red{color:#ef4444} .gray{color:#94a3b8}
+
+  .section-title{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:#0d9488;margin:32px 0 16px;display:flex;align-items:center;gap:12px}
+  .section-title::after{content:'';flex:1;height:1px;background:#e2e8f0}
+
+  .chart-box{margin-bottom:32px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:16px;padding:24px;overflow:hidden}
+  .chart-box img{width:100%;display:block;border-radius:10px}
+
+  table{width:100%;border-collapse:separate;border-spacing:0;border-radius:14px;overflow:hidden;border:1px solid #e2e8f0;font-size:12px}
+  thead{background:linear-gradient(135deg,#0d9488,#14b8a6)}
+  th{color:white;padding:12px 18px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:0.8px;text-align:left}
+  td{padding:11px 18px;border-bottom:1px solid #f1f5f9}
+  tr:nth-child(even){background:#f8fafc}
+  tr:last-child td{border-bottom:none}
+  .w-col{font-weight:800;color:#0f172a}
+
+  .footer{margin-top:36px;padding-top:18px;border-top:1px solid #e2e8f0;display:flex;justify-content:space-between;align-items:center}
+  .footer p{font-size:9px;color:#94a3b8;font-weight:500}
+  .footer .brand{color:#0d9488;font-weight:800}
+
+  @media print{body{padding:20px 24px;max-width:none}table{page-break-inside:auto}tr{page-break-inside:avoid}.chart-box{break-inside:avoid}}
 </style></head><body>
 
-<div class="hdr">
-  <div class="logo">
+<div class="header">
+  <div class="logo-box">
     <svg viewBox="0 0 24 24"><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="M7 21h10"/><path d="M12 3v18"/><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/></svg>
   </div>
   <div>
@@ -195,34 +199,34 @@ function buildPDF(
 </div>
 
 ${stats ? `
-<div class="grid">
-  <div class="card">
-    <div class="card-label">Poids actuel</div>
-    <div class="card-val">${stats.current.toFixed(1)} <span class="card-unit">kg</span></div>
-    <div class="card-sub ${stats.diff <= 0 ? 'green' : 'red'}">${stats.diff > 0 ? '+' : ''}${stats.diff.toFixed(1)} kg</div>
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-label">Actuel</div>
+    <div class="stat-value">${stats.current.toFixed(1)} <span class="stat-unit">kg</span></div>
+    <div class="stat-sub ${stats.diff <= 0 ? 'green' : 'red'}">${stats.diff > 0 ? '+' : ''}${stats.diff.toFixed(1)} kg</div>
   </div>
-  <div class="card">
-    <div class="card-label">Moyenne</div>
-    <div class="card-val">${stats.avg.toFixed(1)} <span class="card-unit">kg</span></div>
-    <div class="card-sub gray">${entries.length} pesées</div>
+  <div class="stat-card">
+    <div class="stat-label">Moyenne</div>
+    <div class="stat-value">${stats.avg.toFixed(1)} <span class="stat-unit">kg</span></div>
+    <div class="stat-sub gray">${entries.length} pesées</div>
   </div>
-  <div class="card">
-    <div class="card-label">Amplitude</div>
-    <div class="card-val">${(stats.max - stats.min).toFixed(1)} <span class="card-unit">kg</span></div>
-    <div class="card-sub gray">${stats.min.toFixed(1)} → ${stats.max.toFixed(1)}</div>
+  <div class="stat-card">
+    <div class="stat-label">Amplitude</div>
+    <div class="stat-value">${(stats.max - stats.min).toFixed(1)} <span class="stat-unit">kg</span></div>
+    <div class="stat-sub gray">${stats.min.toFixed(1)} → ${stats.max.toFixed(1)}</div>
   </div>
-  <div class="card">
-    <div class="card-label">${bmi ? 'IMC' : (goalWeight ? 'Objectif' : 'Max')}</div>
-    <div class="card-val">${bmi ? bmi.toFixed(1) : (goalWeight ? goalWeight.toFixed(1) : stats.max.toFixed(1))} <span class="card-unit">${bmi ? '' : 'kg'}</span></div>
-    <div class="card-sub ${bmiCat ? (bmiCat.label === 'Normal' ? 'green' : 'red') : 'gray'}">${bmiCat ? bmiCat.label : (goalWeight ? `${(stats.current - goalWeight) > 0 ? '+' : ''}${(stats.current - goalWeight).toFixed(1)} kg restant` : '')}</div>
+  <div class="stat-card">
+    <div class="stat-label">${bmi ? 'IMC' : (goalWeight ? 'Objectif' : 'Max')}</div>
+    <div class="stat-value">${bmi ? bmi.toFixed(1) : (goalWeight ? goalWeight.toFixed(1) : stats.max.toFixed(1))} <span class="stat-unit">${bmi ? '' : 'kg'}</span></div>
+    <div class="stat-sub ${bmiCat ? (bmiCat.label === 'Normal' ? 'green' : 'red') : 'gray'}">${bmiCat ? bmiCat.label : (goalWeight ? `${(stats.current - goalWeight) > 0 ? '+' : ''}${(stats.current - goalWeight).toFixed(1)} kg restant` : '')}</div>
   </div>
 </div>` : ''}
 
 ${chartImg ? `
-<div class="section">Évolution</div>
-<div class="chart"><img src="${chartImg}" alt="Graphique d'évolution" /></div>` : ''}
+<div class="section-title">Évolution</div>
+<div class="chart-box"><img src="${chartImg}" alt="Graphique d'évolution du poids" /></div>` : ''}
 
-<div class="section">Historique</div>
+<div class="section-title">Historique complet</div>
 <table>
   <thead><tr><th>Date</th><th>Poids</th><th>Variation</th></tr></thead>
   <tbody>
@@ -237,7 +241,7 @@ ${chartImg ? `
   </tbody>
 </table>
 
-<div class="foot">
+<div class="footer">
   <p><span class="brand">Suivi de poids</span> — Rapport généré automatiquement</p>
   <p>${timeStr}</p>
 </div>
