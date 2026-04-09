@@ -37,19 +37,19 @@ export default function SettingsDialog({ settings, onSave }: Props) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="ghost" size="icon" className="shrink-0 rounded-xl" aria-label="Paramètres">
+        <Button variant="ghost" size="icon" className="shrink-0 rounded-2xl h-10 w-10" aria-label="Paramètres">
           <Settings className="h-4 w-4" />
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-sm rounded-2xl">
+      <DialogContent className="max-w-sm rounded-3xl">
         <DialogHeader>
-          <DialogTitle className="text-lg font-black">Paramètres</DialogTitle>
+          <DialogTitle className="text-xl font-black">⚙️ Paramètres</DialogTitle>
         </DialogHeader>
-        <div className="space-y-5 pt-2">
+        <div className="space-y-5 pt-3">
           <div className="space-y-2">
             <Label className="flex items-center gap-2 text-xs font-bold text-muted-foreground">
-              <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-primary/10">
-                <Target className="h-3 w-3 text-primary" />
+              <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-primary/10">
+                <Target className="h-3.5 w-3.5 text-primary" />
               </div>
               Poids objectif (kg)
             </Label>
@@ -61,13 +61,13 @@ export default function SettingsDialog({ settings, onSave }: Props) {
               placeholder="Ex: 70"
               value={goalWeight}
               onChange={(e) => setGoalWeight(e.target.value)}
-              className="h-12 rounded-xl bg-muted/50 border-0"
+              className="h-12 rounded-2xl bg-secondary/50 border-0"
             />
           </div>
           <div className="space-y-2">
             <Label className="flex items-center gap-2 text-xs font-bold text-muted-foreground">
-              <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-primary/10">
-                <Ruler className="h-3 w-3 text-primary" />
+              <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-primary/10">
+                <Ruler className="h-3.5 w-3.5 text-primary" />
               </div>
               Taille (cm)
             </Label>
@@ -79,12 +79,12 @@ export default function SettingsDialog({ settings, onSave }: Props) {
               placeholder="Ex: 175"
               value={height}
               onChange={(e) => setHeight(e.target.value)}
-              className="h-12 rounded-xl bg-muted/50 border-0"
+              className="h-12 rounded-2xl bg-secondary/50 border-0"
             />
           </div>
           <Button
             onClick={handleSave}
-            className="w-full h-12 rounded-xl font-bold shadow-md shadow-primary/20"
+            className="w-full h-12 rounded-2xl font-bold shadow-lg shadow-primary/20"
           >
             Enregistrer
           </Button>

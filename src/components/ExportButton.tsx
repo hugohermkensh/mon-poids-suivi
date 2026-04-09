@@ -83,7 +83,6 @@ export default function ExportButton({ entries, chartRef, goalWeight, height }: 
   };
 
   const handlePDF = () => {
-    // Open window synchronously to avoid popup blocker
     const win = window.open("", "_blank");
     if (!win) {
       toast({ title: "Popup bloqué", description: "Autorisez les popups pour exporter.", variant: "destructive" });
@@ -91,11 +90,11 @@ export default function ExportButton({ entries, chartRef, goalWeight, height }: 
     }
 
     win.document.write(`<html><head><title>Chargement...</title><style>
-      body{font-family:-apple-system,sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;background:#fafafa}
-      .l{text-align:center;color:#0d9488}
-      .s{width:28px;height:28px;border:3px solid #e5e7eb;border-top-color:#0d9488;border-radius:50%;animation:r 0.6s linear infinite;margin:0 auto 12px}
+      body{font-family:-apple-system,sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;background:#f8f7ff}
+      .l{text-align:center;color:#6d5cff}
+      .s{width:32px;height:32px;border:3px solid #e5e7eb;border-top-color:#6d5cff;border-radius:50%;animation:r 0.6s linear infinite;margin:0 auto 12px}
       @keyframes r{to{transform:rotate(360deg)}}
-    </style></head><body><div class="l"><div class="s"></div><p style="font-size:13px;font-weight:500">Génération du rapport...</p></div></body></html>`);
+    </style></head><body><div class="l"><div class="s"></div><p style="font-size:13px;font-weight:600">Génération du rapport...</p></div></body></html>`);
 
     captureChart(chartRef).then((chartImg) => {
       const stats = getStats(entries);
@@ -116,17 +115,17 @@ export default function ExportButton({ entries, chartRef, goalWeight, height }: 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="shrink-0 rounded-xl" aria-label="Exporter">
+        <Button variant="ghost" size="icon" className="shrink-0 rounded-2xl h-10 w-10" aria-label="Exporter">
           <Download className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="min-w-[180px] rounded-xl">
-        <DropdownMenuItem onClick={handleCSV} className="gap-2.5 rounded-lg">
+      <DropdownMenuContent align="end" className="min-w-[180px] rounded-2xl">
+        <DropdownMenuItem onClick={handleCSV} className="gap-2.5 rounded-xl">
           <Table2 className="h-4 w-4 text-muted-foreground" />
           Exporter CSV
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={handlePDF} className="gap-2.5 rounded-lg">
+        <DropdownMenuItem onClick={handlePDF} className="gap-2.5 rounded-xl">
           <FileText className="h-4 w-4 text-muted-foreground" />
           Imprimer / PDF
         </DropdownMenuItem>
@@ -147,43 +146,43 @@ function buildPDFHtml(
   const timeStr = format(new Date(), "dd/MM/yyyy 'à' HH:mm", { locale: fr });
 
   return `<!DOCTYPE html>
-<html lang="fr"><head><meta charset="utf-8"><title>Suivi de poids — Rapport</title>
+<html lang="fr"><head><meta charset="utf-8"><title>WeightTrack — Rapport</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800;900&display=swap');
   *{margin:0;padding:0;box-sizing:border-box}
-  body{font-family:'Inter',-apple-system,sans-serif;color:#0f172a;background:#fff;max-width:700px;margin:0 auto;padding:44px 48px}
+  body{font-family:'DM Sans',-apple-system,sans-serif;color:#1a1a2e;background:#fff;max-width:700px;margin:0 auto;padding:48px}
 
-  .header{display:flex;align-items:center;gap:18px;margin-bottom:36px;padding-bottom:28px;border-bottom:3px solid #0d9488}
-  .logo-box{width:48px;height:48px;background:linear-gradient(135deg,#0d9488,#14b8a6);border-radius:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 4px 12px rgba(13,148,136,0.25)}
+  .header{display:flex;align-items:center;gap:20px;margin-bottom:40px;padding-bottom:28px;border-bottom:3px solid #6d5cff}
+  .logo-box{width:52px;height:52px;background:linear-gradient(135deg,#6d5cff,#8b7fff);border-radius:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 8px 24px rgba(109,92,255,0.3)}
   .logo-box svg{width:24px;height:24px;stroke:white;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-  .header h1{font-size:22px;font-weight:900;color:#0f172a;letter-spacing:-0.3px}
-  .header p{font-size:12px;color:#64748b;margin-top:3px;font-weight:500}
+  .header h1{font-size:24px;font-weight:900;color:#1a1a2e;letter-spacing:-0.5px}
+  .header p{font-size:12px;color:#6b7280;margin-top:4px;font-weight:500}
 
-  .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:32px}
-  .stat-card{background:#f8fafc;border:1px solid #e2e8f0;border-radius:14px;padding:16px 18px}
-  .stat-label{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#94a3b8;margin-bottom:6px}
-  .stat-value{font-size:24px;font-weight:900;color:#0f172a;letter-spacing:-0.5px}
-  .stat-unit{font-size:11px;font-weight:600;color:#94a3b8}
-  .stat-sub{font-size:10px;font-weight:700;margin-top:5px}
-  .green{color:#0d9488} .red{color:#ef4444} .gray{color:#94a3b8}
+  .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:36px}
+  .stat-card{background:#f8f7ff;border:1px solid #e8e6ff;border-radius:16px;padding:18px}
+  .stat-label{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1.2px;color:#9ca3af;margin-bottom:8px}
+  .stat-value{font-size:26px;font-weight:900;color:#1a1a2e;letter-spacing:-0.5px}
+  .stat-unit{font-size:11px;font-weight:600;color:#9ca3af}
+  .stat-sub{font-size:10px;font-weight:700;margin-top:6px}
+  .green{color:#22c55e} .red{color:#ef4444} .gray{color:#9ca3af}
 
-  .section-title{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:#0d9488;margin:32px 0 16px;display:flex;align-items:center;gap:12px}
-  .section-title::after{content:'';flex:1;height:1px;background:#e2e8f0}
+  .section-title{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:2px;color:#6d5cff;margin:36px 0 18px;display:flex;align-items:center;gap:14px}
+  .section-title::after{content:'';flex:1;height:1px;background:#e8e6ff}
 
-  .chart-box{margin-bottom:32px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:16px;padding:24px;overflow:hidden}
-  .chart-box img{width:100%;display:block;border-radius:10px}
+  .chart-box{margin-bottom:36px;background:#f8f7ff;border:1px solid #e8e6ff;border-radius:20px;padding:24px;overflow:hidden}
+  .chart-box img{width:100%;display:block;border-radius:12px}
 
-  table{width:100%;border-collapse:separate;border-spacing:0;border-radius:14px;overflow:hidden;border:1px solid #e2e8f0;font-size:12px}
-  thead{background:linear-gradient(135deg,#0d9488,#14b8a6)}
-  th{color:white;padding:12px 18px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:0.8px;text-align:left}
-  td{padding:11px 18px;border-bottom:1px solid #f1f5f9}
-  tr:nth-child(even){background:#f8fafc}
+  table{width:100%;border-collapse:separate;border-spacing:0;border-radius:16px;overflow:hidden;border:1px solid #e8e6ff;font-size:12px}
+  thead{background:linear-gradient(135deg,#6d5cff,#8b7fff)}
+  th{color:white;padding:14px 20px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;text-align:left}
+  td{padding:12px 20px;border-bottom:1px solid #f3f4f6}
+  tr:nth-child(even){background:#faf9ff}
   tr:last-child td{border-bottom:none}
-  .w-col{font-weight:800;color:#0f172a}
+  .w-col{font-weight:800;color:#1a1a2e}
 
-  .footer{margin-top:36px;padding-top:18px;border-top:1px solid #e2e8f0;display:flex;justify-content:space-between;align-items:center}
-  .footer p{font-size:9px;color:#94a3b8;font-weight:500}
-  .footer .brand{color:#0d9488;font-weight:800}
+  .footer{margin-top:40px;padding-top:20px;border-top:1px solid #e8e6ff;display:flex;justify-content:space-between;align-items:center}
+  .footer p{font-size:9px;color:#9ca3af;font-weight:500}
+  .footer .brand{color:#6d5cff;font-weight:900}
 
   @media print{body{padding:20px 24px;max-width:none}table{page-break-inside:auto}tr{page-break-inside:avoid}.chart-box{break-inside:avoid}}
 </style></head><body>
@@ -193,8 +192,8 @@ function buildPDFHtml(
     <svg viewBox="0 0 24 24"><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="M7 21h10"/><path d="M12 3v18"/><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/></svg>
   </div>
   <div>
-    <h1>Suivi de poids</h1>
-    <p>Rapport du ${dateStr} — ${entries.length} pesée${entries.length !== 1 ? "s" : ""}</p>
+    <h1>WeightTrack</h1>
+    <p>Rapport du ${dateStr} · ${entries.length} pesée${entries.length !== 1 ? "s" : ""}</p>
   </div>
 </div>
 
@@ -224,9 +223,9 @@ ${stats ? `
 
 ${chartImg ? `
 <div class="section-title">Évolution</div>
-<div class="chart-box"><img src="${chartImg}" alt="Graphique d'évolution du poids" /></div>` : ''}
+<div class="chart-box"><img src="${chartImg}" alt="Graphique" /></div>` : ''}
 
-<div class="section-title">Historique complet</div>
+<div class="section-title">Historique</div>
 <table>
   <thead><tr><th>Date</th><th>Poids</th><th>Variation</th></tr></thead>
   <tbody>
@@ -242,7 +241,7 @@ ${chartImg ? `
 </table>
 
 <div class="footer">
-  <p><span class="brand">Suivi de poids</span> — Rapport généré automatiquement</p>
+  <p><span class="brand">WeightTrack</span> · Rapport généré automatiquement</p>
   <p>${timeStr}</p>
 </div>
 
