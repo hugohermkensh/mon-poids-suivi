@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef } from "react";
-import { Scale } from "lucide-react";
+import { Scale, Sparkles } from "lucide-react";
 import {
   getEntries,
   addEntry,
@@ -49,77 +49,86 @@ const Index = () => {
   const stats = getStats(entries);
 
   return (
-    <div className="min-h-screen bg-background relative overflow-hidden">
-      {/* Decorative blobs */}
-      <div className="pointer-events-none absolute -top-32 -right-32 w-80 h-80 rounded-full bg-primary/5 blur-3xl" />
-      <div className="pointer-events-none absolute -bottom-40 -left-40 w-96 h-96 rounded-full bg-primary/3 blur-3xl" />
+    <div className="min-h-screen bg-background relative">
+      {/* Subtle gradient orbs */}
+      <div className="pointer-events-none fixed inset-0 overflow-hidden">
+        <div className="absolute -top-48 -right-48 w-[500px] h-[500px] rounded-full bg-primary/[0.04] blur-[100px]" />
+        <div className="absolute -bottom-48 -left-48 w-[400px] h-[400px] rounded-full bg-primary/[0.03] blur-[100px]" />
+      </div>
 
-      <div className="relative mx-auto max-w-lg px-4 py-8 space-y-6">
+      <div className="relative mx-auto max-w-md px-5 py-10 space-y-8">
         {/* Header */}
-        <header className="flex items-center justify-between animate-slide-up">
-          <div className="flex items-center gap-3.5">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-primary/80 shadow-lg shadow-primary/20">
-              <Scale className="h-5.5 w-5.5 text-primary-foreground" strokeWidth={2.5} />
+        <header className="animate-slide-up">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="relative">
+                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary shadow-xl shadow-primary/25">
+                  <Scale className="h-6 w-6 text-primary-foreground" strokeWidth={2.5} />
+                </div>
+                <div className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-accent border-2 border-background">
+                  <Sparkles className="h-2.5 w-2.5 text-accent-foreground" />
+                </div>
+              </div>
+              <div>
+                <h1 className="text-2xl font-black tracking-tight text-foreground">
+                  WeightTrack
+                </h1>
+                <p className="text-sm text-muted-foreground mt-0.5 font-medium">
+                  {entries.length === 0
+                    ? "Commencez votre suivi"
+                    : `${entries.length} pesée${entries.length !== 1 ? "s" : ""}`}
+                </p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-xl font-black tracking-tight text-foreground">
-                Suivi de poids
-              </h1>
-              <p className="text-xs font-medium text-muted-foreground mt-0.5">
-                {entries.length === 0
-                  ? "Commencez votre suivi"
-                  : `${entries.length} pesée${entries.length !== 1 ? "s" : ""} enregistrée${entries.length !== 1 ? "s" : ""}`}
-              </p>
+            <div className="flex items-center gap-1">
+              <ExportButton entries={entries} chartRef={chartRef} goalWeight={settings.goalWeight} height={settings.height} />
+              <SettingsDialog settings={settings} onSave={handleSaveSettings} />
+              <ThemeToggle />
             </div>
-          </div>
-          <div className="flex items-center gap-1">
-            <ExportButton entries={entries} chartRef={chartRef} goalWeight={settings.goalWeight} height={settings.height} />
-            <SettingsDialog settings={settings} onSave={handleSaveSettings} />
-            <ThemeToggle />
           </div>
         </header>
 
         {/* Form */}
-        <div className="animate-slide-up" style={{ animationDelay: "60ms" }}>
+        <div className="animate-slide-up" style={{ animationDelay: "80ms" }}>
           <WeightForm onAdd={handleAdd} />
         </div>
 
         {/* Stats */}
-        <div className="animate-slide-up" style={{ animationDelay: "120ms" }}>
+        <div className="animate-slide-up" style={{ animationDelay: "160ms" }}>
           <StatsCards stats={stats} goalWeight={settings.goalWeight} height={settings.height} />
         </div>
 
         {/* Goal Prediction */}
         {settings.goalWeight && entries.length >= 7 && (
-          <div className="animate-slide-up" style={{ animationDelay: "180ms" }}>
+          <div className="animate-slide-up" style={{ animationDelay: "240ms" }}>
             <GoalPrediction entries={entries} goalWeight={settings.goalWeight} />
           </div>
         )}
 
         {/* Chart */}
-        <div className="animate-slide-up" style={{ animationDelay: "240ms" }}>
-          <section ref={chartRef} className="glass-card rounded-2xl p-5">
-            <h2 className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground mb-4">
-              Évolution
+        <div className="animate-slide-up" style={{ animationDelay: "320ms" }}>
+          <section ref={chartRef} className="glass-card rounded-3xl p-6">
+            <h2 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-5">
+              📊 Évolution
             </h2>
             <WeightChart entries={entries} goalWeight={settings.goalWeight} />
           </section>
         </div>
 
         {/* History */}
-        <div className="animate-slide-up" style={{ animationDelay: "300ms" }}>
+        <div className="animate-slide-up" style={{ animationDelay: "400ms" }}>
           <section>
-            <h2 className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground mb-3 px-1">
-              Historique
+            <h2 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-4 px-1">
+              📋 Historique
             </h2>
             <WeightHistory entries={entries} onDelete={handleDelete} onEdit={handleEdit} />
           </section>
         </div>
 
         {/* Footer */}
-        <footer className="text-center pb-8 pt-4 animate-fade-in" style={{ animationDelay: "400ms" }}>
-          <p className="text-[10px] font-medium text-muted-foreground/30 tracking-wide">
-            Données stockées localement sur votre appareil
+        <footer className="text-center pb-10 pt-4 animate-fade-in" style={{ animationDelay: "500ms" }}>
+          <p className="text-xs text-muted-foreground/40 font-medium">
+            Données stockées localement · WeightTrack
           </p>
         </footer>
       </div>

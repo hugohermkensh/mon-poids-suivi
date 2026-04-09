@@ -20,22 +20,22 @@ export default function DeleteConfirmDialog({ onConfirm }: Props) {
     <AlertDialog>
       <AlertDialogTrigger asChild>
         <button
-          className="h-7 w-7 rounded-lg flex items-center justify-center text-muted-foreground/40 hover:text-destructive hover:bg-destructive/10 transition-colors"
+          className="h-8 w-8 rounded-xl flex items-center justify-center text-muted-foreground/40 hover:text-destructive hover:bg-destructive/10 transition-all"
           aria-label="Supprimer"
         >
           <Trash2 className="h-3.5 w-3.5" />
         </button>
       </AlertDialogTrigger>
-      <AlertDialogContent className="max-w-sm rounded-2xl">
+      <AlertDialogContent className="max-w-sm rounded-3xl">
         <AlertDialogHeader>
-          <AlertDialogTitle className="font-bold">Supprimer cette entrée ?</AlertDialogTitle>
+          <AlertDialogTitle className="font-black text-lg">🗑️ Supprimer cette entrée ?</AlertDialogTitle>
           <AlertDialogDescription>
             Cette action est irréversible.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel className="rounded-xl">Annuler</AlertDialogCancel>
-          <AlertDialogAction onClick={onConfirm} className="rounded-xl bg-destructive hover:bg-destructive/90">
+          <AlertDialogCancel className="rounded-2xl">Annuler</AlertDialogCancel>
+          <AlertDialogAction onClick={onConfirm} className="rounded-2xl bg-destructive hover:bg-destructive/90">
             Supprimer
           </AlertDialogAction>
         </AlertDialogFooter>

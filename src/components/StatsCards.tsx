@@ -20,9 +20,9 @@ export default function StatsCards({ stats, goalWeight, height }: Props) {
     return (
       <div className="grid grid-cols-2 gap-3">
         {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="glass-card rounded-2xl p-4 animate-pulse">
-            <div className="h-2 w-14 rounded-full bg-muted mb-4" />
-            <div className="h-6 w-12 rounded-lg bg-muted" />
+          <div key={i} className="glass-card rounded-3xl p-5 animate-pulse">
+            <div className="h-2 w-14 rounded-full bg-muted mb-5" />
+            <div className="h-7 w-14 rounded-lg bg-muted" />
           </div>
         ))}
       </div>
@@ -35,11 +35,12 @@ export default function StatsCards({ stats, goalWeight, height }: Props) {
 
   const cards = [
     {
-      label: "Poids actuel",
+      label: "Actuel",
       value: stats.current.toFixed(1),
       unit: "kg",
       icon: Scale,
       featured: true,
+      emoji: "⚡",
       sub: stats.diff !== 0 ? `${stats.diff > 0 ? "+" : ""}${stats.diff.toFixed(1)} kg` : null,
       subPositive: stats.diff <= 0,
     },
@@ -48,6 +49,7 @@ export default function StatsCards({ stats, goalWeight, height }: Props) {
           label: "IMC",
           value: bmi.toFixed(1),
           icon: Heart,
+          emoji: "❤️",
           sub: bmiCategory.label,
           subClassName: bmiCategory.color,
         }]
@@ -56,6 +58,7 @@ export default function StatsCards({ stats, goalWeight, height }: Props) {
           value: stats.avg.toFixed(1),
           unit: "kg",
           icon: Activity,
+          emoji: "📊",
         }]),
     ...(goalWeight && goalDiff !== null
       ? [{
@@ -63,6 +66,7 @@ export default function StatsCards({ stats, goalWeight, height }: Props) {
           value: goalWeight.toFixed(1),
           unit: "kg",
           icon: Target,
+          emoji: "🎯",
           sub: `${goalDiff > 0 ? "+" : ""}${goalDiff.toFixed(1)} kg restant`,
           subPositive: goalDiff <= 0,
         }]
@@ -71,12 +75,14 @@ export default function StatsCards({ stats, goalWeight, height }: Props) {
           value: stats.min.toFixed(1),
           unit: "kg",
           icon: TrendingDown,
+          emoji: "📉",
         }]),
     {
       label: bmi ? "Moyenne" : "Maximum",
       value: bmi ? stats.avg.toFixed(1) : stats.max.toFixed(1),
       unit: "kg",
       icon: bmi ? Activity : TrendingUp,
+      emoji: bmi ? "📊" : "📈",
     },
   ];
 
@@ -85,32 +91,28 @@ export default function StatsCards({ stats, goalWeight, height }: Props) {
       {cards.map((c: any) => (
         <div
           key={c.label}
-          className={`glass-card rounded-2xl p-4 transition-all hover:shadow-md ${
+          className={`rounded-3xl p-5 transition-all hover:scale-[1.02] ${
             c.featured
-              ? "bg-gradient-to-br from-primary/8 to-primary/3 border-primary/15"
-              : ""
+              ? "glow-card"
+              : "glass-card"
           }`}
         >
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground">
               {c.label}
             </span>
-            <div className={`flex h-7 w-7 items-center justify-center rounded-lg ${
-              c.featured ? "bg-primary/12" : "bg-muted/60"
-            }`}>
-              <c.icon className={`h-3.5 w-3.5 ${c.featured ? "text-primary" : "text-muted-foreground"}`} />
-            </div>
+            <span className="text-base">{c.emoji}</span>
           </div>
-          <div className="flex items-baseline gap-1">
-            <span className="text-2xl font-black text-foreground tracking-tight">
+          <div className="flex items-baseline gap-1.5">
+            <span className="text-3xl font-black text-foreground tracking-tight">
               {c.value}
             </span>
             {c.unit && (
-              <span className="text-xs font-semibold text-muted-foreground">{c.unit}</span>
+              <span className="text-sm font-bold text-muted-foreground">{c.unit}</span>
             )}
           </div>
           {c.sub && (
-            <p className={`text-[11px] font-semibold mt-1.5 ${
+            <p className={`text-xs font-bold mt-2 ${
               c.subClassName || (c.subPositive ? "text-stat-up" : "text-stat-down")
             }`}>
               {c.sub}

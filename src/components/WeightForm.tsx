@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, CalendarDays, Weight, StickyNote } from "lucide-react";
+import { Plus, CalendarDays, Weight, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
@@ -31,54 +31,37 @@ export default function WeightForm({ onAdd }: Props) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="glass-card rounded-2xl p-5 space-y-3">
-      <div className="flex gap-2.5">
-        <div className="relative flex-1">
-          <CalendarDays className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60 pointer-events-none" />
+    <form onSubmit={handleSubmit} className="glass-card rounded-3xl p-6 space-y-4">
+      <div className="grid grid-cols-2 gap-3">
+        <div className="space-y-2">
+          <label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+            <CalendarDays className="h-3 w-3" />
+            Date
+          </label>
           <Input
             type="date"
             value={date}
             onChange={(e) => setDate(e.target.value)}
-            className="h-12 pl-10 rounded-xl bg-muted/50 border-0 text-sm font-medium focus:bg-muted/70 transition-colors"
+            className="h-12 rounded-2xl bg-secondary/50 border-0 text-sm font-semibold focus:ring-2 focus:ring-primary/30"
             max={today}
           />
         </div>
-        <div className="relative flex-1">
-          <Weight className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60 pointer-events-none" />
+        <div className="space-y-2">
+          <label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+            <Weight className="h-3 w-3" />
+            Poids (kg)
+          </label>
           <Input
             type="number"
             step="0.1"
             min="20"
             max="300"
-            placeholder="Poids en kg"
+            placeholder="72.5"
             value={weight}
             onChange={(e) => setWeight(e.target.value)}
-            className="h-12 pl-10 rounded-xl bg-muted/50 border-0 text-sm font-bold focus:bg-muted/70 transition-colors"
+            className="h-12 rounded-2xl bg-secondary/50 border-0 text-sm font-black focus:ring-2 focus:ring-primary/30"
           />
         </div>
-      </div>
-
-      <div className="flex items-center gap-2">
-        <button
-          type="button"
-          onClick={() => setShowNote(!showNote)}
-          className={`flex items-center gap-1.5 px-3.5 h-10 rounded-xl text-xs font-semibold transition-all ${
-            showNote
-              ? "bg-primary/10 text-primary ring-1 ring-primary/20"
-              : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
-          }`}
-        >
-          <StickyNote className="h-3.5 w-3.5" />
-          Note
-        </button>
-        <div className="flex-1" />
-        <Button
-          type="submit"
-          className="h-10 px-6 rounded-xl font-bold text-xs gap-2 shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30 transition-all"
-        >
-          <Plus className="h-4 w-4" strokeWidth={2.5} />
-          Ajouter
-        </Button>
       </div>
 
       {showNote && (
@@ -86,10 +69,32 @@ export default function WeightForm({ onAdd }: Props) {
           placeholder="Ex: après sport, à jeun..."
           value={note}
           onChange={(e) => setNote(e.target.value)}
-          className="h-11 rounded-xl bg-muted/50 border-0 text-sm animate-fade-in"
+          className="h-11 rounded-2xl bg-secondary/50 border-0 text-sm animate-fade-in"
           autoFocus
         />
       )}
+
+      <div className="flex items-center gap-3 pt-1">
+        <button
+          type="button"
+          onClick={() => setShowNote(!showNote)}
+          className={`flex items-center gap-1.5 px-4 h-11 rounded-2xl text-xs font-bold transition-all ${
+            showNote
+              ? "bg-primary/10 text-primary"
+              : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+          }`}
+        >
+          <MessageSquare className="h-3.5 w-3.5" />
+          Note
+        </button>
+        <Button
+          type="submit"
+          className="flex-1 h-11 rounded-2xl font-bold text-sm gap-2 shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 transition-all"
+        >
+          <Plus className="h-4 w-4" strokeWidth={3} />
+          Enregistrer
+        </Button>
+      </div>
     </form>
   );
 }
