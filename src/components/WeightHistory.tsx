@@ -13,11 +13,12 @@ interface Props {
 export default function WeightHistory({ entries, onDelete, onEdit }: Props) {
   if (entries.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 text-center">
-        <span className="text-4xl mb-4">🏋️</span>
-        <p className="text-sm font-bold text-foreground">Pas encore de pesée</p>
-        <p className="text-xs text-muted-foreground mt-2 max-w-[220px] leading-relaxed">
-          Ajoutez votre premier poids ci-dessus pour commencer le suivi
+      <div className="flex flex-col items-center justify-center py-14 text-center px-4">
+        <div className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground font-mono mb-3">
+          ╴ NO DATA ╴
+        </div>
+        <p className="text-xs text-muted-foreground/60 font-mono max-w-[240px] leading-relaxed">
+          Aucune entrée dans le registre.<br />Effectuez une première saisie.
         </p>
       </div>
     );
@@ -26,55 +27,57 @@ export default function WeightHistory({ entries, onDelete, onEdit }: Props) {
   const sorted = [...entries].reverse();
 
   return (
-    <div className="space-y-2.5">
+    <div className="flex flex-col">
       {sorted.map((entry, i) => {
         const prev = sorted[i + 1];
         const diff = prev ? entry.weight - prev.weight : 0;
+        const isLatest = i === 0;
         return (
           <div
             key={entry.id}
-            className="group glass-card flex items-center gap-4 rounded-2xl px-5 py-4 transition-all hover:shadow-md hover:scale-[1.01]"
+            className="group flex items-center justify-between px-4 py-3 border-b border-border/50 last:border-b-0 hover:bg-secondary/40 transition-colors"
           >
-            {/* Weight circle */}
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 shrink-0">
-              <span className="text-sm font-black text-primary">
-                {entry.weight.toFixed(0)}
-              </span>
-            </div>
-
-            {/* Info */}
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2.5">
-                <span className="text-base font-black text-foreground tracking-tight">
-                  {entry.weight.toFixed(1)}
-                  <span className="text-xs font-bold text-muted-foreground ml-1">kg</span>
+            <div className="flex flex-col gap-0.5 min-w-0">
+              <div className="flex items-center gap-2">
+                <span className={`text-xs font-mono tracking-wider ${isLatest ? "text-foreground" : "text-muted-foreground"}`}>
+                  {format(parseISO(entry.date), "dd MMM yyyy", { locale: fr }).toUpperCase()}
                 </span>
-                {diff !== 0 && (
-                  <span
-                    className={`text-[11px] font-bold px-2.5 py-1 rounded-full ${
-                      diff <= 0
-                        ? "text-stat-up bg-stat-up/10"
-                        : "text-stat-down bg-stat-down/10"
-                    }`}
-                  >
-                    {diff > 0 ? "↑" : "↓"} {Math.abs(diff).toFixed(1)}
+                {isLatest && (
+                  <span className="text-[8px] font-mono uppercase tracking-widest text-primary-foreground bg-primary px-1 leading-tight">
+                    LAST
                   </span>
                 )}
               </div>
-              <p className="text-xs text-muted-foreground mt-1 capitalize">
-                {format(parseISO(entry.date), "EEEE d MMMM yyyy", { locale: fr })}
-              </p>
               {entry.note && (
-                <p className="text-[11px] text-muted-foreground/50 mt-1 truncate italic">
-                  {entry.note}
-                </p>
+                <span className="text-[10px] text-muted-foreground/60 font-mono truncate max-w-[180px]">
+                  // {entry.note}
+                </span>
               )}
             </div>
 
-            {/* Actions */}
-            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-              <EditEntryDialog entry={entry} onSave={onEdit} />
-              <DeleteConfirmDialog onConfirm={() => onDelete(entry.id)} />
+            <div className="flex items-center gap-3">
+              {prev ? (
+                <span
+                  className={`text-[10px] font-mono font-bold tabular-nums px-1.5 py-0.5 leading-tight ${
+                    diff <= 0
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-destructive text-destructive-foreground"
+                  }`}
+                >
+                  {diff > 0 ? "+" : ""}{diff.toFixed(1)}
+                </span>
+              ) : (
+                <span className="text-[10px] font-mono text-muted-foreground/50 border border-border px-1.5 py-0.5 leading-tight">
+                  —
+                </span>
+              )}
+              <span className={`text-base font-bold tabular-nums font-mono w-[60px] text-right ${isLatest ? "text-foreground" : "text-muted-foreground"}`}>
+                {entry.weight.toFixed(1)}
+              </span>
+              <div className="flex items-center opacity-0 group-hover:opacity-100 transition-opacity">
+                <EditEntryDialog entry={entry} onSave={onEdit} />
+                <DeleteConfirmDialog onConfirm={() => onDelete(entry.id)} />
+              </div>
             </div>
           </div>
         );

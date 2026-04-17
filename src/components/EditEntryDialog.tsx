@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Pencil } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -35,32 +34,34 @@ export default function EditEntryDialog({ entry, onSave }: Props) {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <button
-          className="h-8 w-8 rounded-xl flex items-center justify-center text-muted-foreground/40 hover:text-primary hover:bg-primary/10 transition-all"
-          aria-label="Modifier"
+          className="h-7 w-7 flex items-center justify-center text-muted-foreground/50 hover:text-accent hover:bg-secondary transition-all"
+          aria-label="Éditer"
         >
           <Pencil className="h-3 w-3" />
         </button>
       </DialogTrigger>
-      <DialogContent className="max-w-sm rounded-3xl">
+      <DialogContent className="max-w-sm rounded-none border-accent/30 bg-card">
         <DialogHeader>
-          <DialogTitle className="font-black text-lg">✏️ Modifier l'entrée</DialogTitle>
+          <DialogTitle className="font-bold text-base uppercase tracking-widest font-mono text-accent">
+            ▸ Édition Entrée
+          </DialogTitle>
         </DialogHeader>
-        <div className="space-y-4 pt-3">
+        <div className="space-y-3 pt-2">
           <div className="space-y-1.5">
-            <Label className="text-xs font-bold text-muted-foreground">Date</Label>
-            <Input type="date" value={date} max={today} onChange={(e) => setDate(e.target.value)} className="h-12 rounded-2xl bg-secondary/50 border-0" />
+            <Label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest font-mono">Date</Label>
+            <Input type="date" value={date} max={today} onChange={(e) => setDate(e.target.value)} className="h-11 rounded-none bg-secondary border-border font-mono focus-visible:border-accent focus-visible:ring-0" />
           </div>
           <div className="space-y-1.5">
-            <Label className="text-xs font-bold text-muted-foreground">Poids (kg)</Label>
-            <Input type="number" step="0.1" min="20" max="300" value={weight} onChange={(e) => setWeight(e.target.value)} className="h-12 rounded-2xl bg-secondary/50 border-0" />
+            <Label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest font-mono">Poids (KG)</Label>
+            <Input type="number" step="0.1" min="20" max="300" value={weight} onChange={(e) => setWeight(e.target.value)} className="h-11 rounded-none bg-secondary border-border font-mono tabular-nums focus-visible:border-accent focus-visible:ring-0" />
           </div>
           <div className="space-y-1.5">
-            <Label className="text-xs font-bold text-muted-foreground">Note</Label>
-            <Input placeholder="Ex: après sport" value={note} onChange={(e) => setNote(e.target.value)} className="h-12 rounded-2xl bg-secondary/50 border-0" />
+            <Label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest font-mono">Note</Label>
+            <Input placeholder="// optionnel" value={note} onChange={(e) => setNote(e.target.value)} className="h-11 rounded-none bg-secondary border-border font-mono focus-visible:border-accent focus-visible:ring-0" />
           </div>
-          <Button onClick={handleSave} className="w-full h-12 rounded-2xl font-bold shadow-lg shadow-primary/20">
-            Enregistrer
-          </Button>
+          <button onClick={handleSave} className="w-full h-11 bg-primary text-primary-foreground font-bold uppercase tracking-widest text-xs hover:bg-foreground transition-colors">
+            Confirmer
+          </button>
         </div>
       </DialogContent>
     </Dialog>
