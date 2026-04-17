@@ -14,8 +14,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ['"Chakra Petch"', 'sans-serif'],
-        mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace'],
+        sans: ['"DM Sans"', 'sans-serif'],
+        mono: ['ui-monospace', 'SFMono-Regular', 'monospace'],
       },
       colors: {
         border: "hsl(var(--border))",

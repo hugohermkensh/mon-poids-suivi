@@ -22,11 +22,11 @@ interface Props {
 type TimeFilter = "7d" | "30d" | "3m" | "1y" | "all";
 
 const FILTERS: { key: TimeFilter; label: string }[] = [
-  { key: "7d", label: "7J" },
-  { key: "30d", label: "30J" },
-  { key: "3m", label: "3M" },
-  { key: "1y", label: "1A" },
-  { key: "all", label: "ALL" },
+  { key: "7d", label: "7j" },
+  { key: "30d", label: "30j" },
+  { key: "3m", label: "3m" },
+  { key: "1y", label: "1an" },
+  { key: "all", label: "Tout" },
 ];
 
 function getFilterDate(filter: TimeFilter): Date | null {
@@ -44,16 +44,16 @@ const CustomTooltip = ({ active, payload }: any) => {
   if (!active || !payload?.length) return null;
   const data = payload[0].payload;
   return (
-    <div className="border border-primary bg-card px-3 py-2 text-xs font-mono shadow-[0_0_20px_rgba(204,255,0,0.2)]">
-      <p className="text-[9px] uppercase tracking-widest text-muted-foreground mb-1">
-        {format(parseISO(data.date), "dd MMM yyyy", { locale: fr })}
+    <div className="rounded-2xl border border-border bg-card/95 backdrop-blur-md px-4 py-3 shadow-xl text-xs">
+      <p className="font-semibold text-muted-foreground mb-1.5 capitalize">
+        {format(parseISO(data.date), "EEEE d MMM", { locale: fr })}
       </p>
-      <p className="text-base font-bold text-foreground tabular-nums">
-        {data.weight} <span className="text-[10px] text-primary">KG</span>
+      <p className="text-lg font-black text-foreground">
+        {data.weight} <span className="text-xs font-semibold text-muted-foreground">kg</span>
       </p>
       {data.movingAvg && (
-        <p className="text-muted-foreground mt-1 text-[10px] tabular-nums">
-          AVG: {data.movingAvg}
+        <p className="text-muted-foreground mt-1.5 text-[11px]">
+          Moy. mobile : {data.movingAvg} kg
         </p>
       )}
     </div>
@@ -65,12 +65,10 @@ export default function WeightChart({ entries, goalWeight }: Props) {
 
   if (entries.length < 2) {
     return (
-      <div className="flex flex-col h-40 items-center justify-center text-center">
-        <div className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground font-mono mb-2">
-          ╴ INSUFFICIENT DATA ╴
-        </div>
-        <p className="text-[10px] font-mono text-muted-foreground/60">
-          MIN 2 ENTRIES REQUIRED
+      <div className="flex flex-col h-48 items-center justify-center text-center">
+        <span className="text-3xl mb-3 animate-float">📈</span>
+        <p className="text-xs font-bold text-muted-foreground">
+          2 pesées minimum pour le graphique
         </p>
       </div>
     );
@@ -88,7 +86,7 @@ export default function WeightChart({ entries, goalWeight }: Props) {
     date: e.date,
     weight: e.weight,
     movingAvg: movingAvg[i]?.avg,
-    label: format(parseISO(e.date), "d/M", { locale: fr }),
+    label: format(parseISO(e.date), "d MMM", { locale: fr }),
   }));
 
   const allWeights = displayEntries.map((e) => e.weight);
@@ -100,15 +98,15 @@ export default function WeightChart({ entries, goalWeight }: Props) {
   return (
     <div>
       {/* Filter pills */}
-      <div className="flex gap-1 mb-4">
+      <div className="flex gap-1.5 mb-6">
         {FILTERS.map((f) => (
           <button
             key={f.key}
             onClick={() => setFilter(f.key)}
-            className={`flex-1 py-1.5 text-[10px] font-bold tracking-widest font-mono uppercase border transition-all ${
+            className={`px-4 py-2 rounded-2xl text-xs font-bold transition-all ${
               filter === f.key
-                ? "bg-primary text-primary-foreground border-primary"
-                : "bg-transparent text-muted-foreground border-border hover:border-primary/50 hover:text-foreground"
+                ? "gradient-primary text-primary-foreground shadow-md shadow-primary/30"
+                : "bg-secondary text-muted-foreground hover:text-foreground hover:bg-secondary/80"
             }`}
           >
             {f.label}
@@ -117,58 +115,62 @@ export default function WeightChart({ entries, goalWeight }: Props) {
       </div>
 
       <ResponsiveContainer width="100%" height={220}>
-        <ComposedChart data={data} margin={{ top: 8, right: 8, left: -18, bottom: 0 }}>
+        <ComposedChart data={data} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
           <defs>
             <linearGradient id="weightGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="hsl(var(--chart-primary))" stopOpacity={0.3} />
-              <stop offset="100%" stopColor="hsl(var(--chart-primary))" stopOpacity={0} />
+              <stop offset="0%" stopColor="hsl(var(--chart-gradient-start))" stopOpacity={0.3} />
+              <stop offset="100%" stopColor="hsl(var(--chart-gradient-end))" stopOpacity={0} />
+            </linearGradient>
+            <linearGradient id="lineGrad" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stopColor="hsl(var(--chart-gradient-start))" />
+              <stop offset="100%" stopColor="hsl(var(--chart-gradient-end))" />
             </linearGradient>
           </defs>
-          <CartesianGrid strokeDasharray="2 4" stroke="hsl(var(--chart-grid))" strokeOpacity={0.6} />
+          <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} strokeOpacity={0.4} />
           <XAxis
             dataKey="label"
-            tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))", fontFamily: "JetBrains Mono" }}
-            axisLine={{ stroke: "hsl(var(--border))" }}
+            tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
+            axisLine={false}
             tickLine={false}
           />
           <YAxis
             domain={[Math.floor(minW - padding), Math.ceil(maxW + padding)]}
-            tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))", fontFamily: "JetBrains Mono" }}
+            tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
             axisLine={false}
             tickLine={false}
+            unit=" kg"
           />
-          <Tooltip content={<CustomTooltip />} cursor={{ stroke: "hsl(var(--primary))", strokeWidth: 1, strokeDasharray: "2 2" }} />
+          <Tooltip content={<CustomTooltip />} cursor={{ stroke: "hsl(var(--primary))", strokeWidth: 1, strokeDasharray: "3 3", strokeOpacity: 0.4 }} />
           {goalWeight && (
             <ReferenceLine
               y={goalWeight}
-              stroke="hsl(var(--accent))"
-              strokeDasharray="4 4"
-              strokeOpacity={0.6}
+              stroke="hsl(var(--primary))"
+              strokeDasharray="8 4"
+              strokeOpacity={0.4}
               label={{
-                value: `▸ ${goalWeight}`,
+                value: `🎯 ${goalWeight} kg`,
                 position: "right",
-                fontSize: 9,
-                fill: "hsl(var(--accent))",
-                fontFamily: "JetBrains Mono",
+                fontSize: 10,
+                fill: "hsl(var(--muted-foreground))",
               }}
             />
           )}
           <Area
             type="monotone"
             dataKey="weight"
-            stroke="hsl(var(--chart-line))"
-            strokeWidth={2}
+            stroke="url(#lineGrad)"
+            strokeWidth={2.5}
             fill="url(#weightGrad)"
-            dot={{ r: 2, fill: "hsl(var(--chart-primary))", strokeWidth: 0 }}
-            activeDot={{ r: 5, fill: "hsl(var(--chart-primary))", strokeWidth: 2, stroke: "hsl(var(--background))" }}
+            dot={{ r: 3.5, fill: "hsl(var(--chart-primary))", strokeWidth: 0 }}
+            activeDot={{ r: 6, fill: "hsl(var(--chart-primary))", strokeWidth: 2, stroke: "hsl(var(--card))" }}
           />
           <Line
             type="monotone"
             dataKey="movingAvg"
-            stroke="hsl(var(--accent))"
-            strokeWidth={1}
-            strokeDasharray="3 3"
-            strokeOpacity={0.4}
+            stroke="hsl(var(--primary))"
+            strokeWidth={1.5}
+            strokeDasharray="5 3"
+            strokeOpacity={0.3}
             dot={false}
           />
         </ComposedChart>

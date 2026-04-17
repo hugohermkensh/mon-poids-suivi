@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { Plus, CalendarDays, Weight, MessageSquare } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
 
@@ -17,7 +19,7 @@ export default function WeightForm({ onAdd }: Props) {
     e.preventDefault();
     const w = parseFloat(weight);
     if (!date || isNaN(w) || w <= 0) {
-      toast({ title: "Saisie invalide", variant: "destructive" });
+      toast({ title: "Veuillez saisir un poids valide", variant: "destructive" });
       return;
     }
     onAdd(date, w, note || undefined);
@@ -25,73 +27,73 @@ export default function WeightForm({ onAdd }: Props) {
     setNote("");
     setDate(today);
     setShowNote(false);
-    toast({ title: `${w.toFixed(1)} KG enregistré` });
+    toast({ title: `${w.toFixed(1)} kg enregistré ✓` });
   };
 
   return (
-    <form onSubmit={handleSubmit} className="panel">
-      <div className="px-4 py-2 border-b border-border flex justify-between items-center">
-        <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground font-mono">
-          ▸ Saisie
-        </span>
-        <button
-          type="button"
-          onClick={() => setShowNote(!showNote)}
-          className={`text-[9px] font-mono uppercase tracking-widest px-2 py-0.5 transition-colors ${
-            showNote ? "text-accent" : "text-muted-foreground hover:text-foreground"
-          }`}
-        >
-          [+ NOTE]
-        </button>
-      </div>
-
-      <div className="p-4 space-y-3">
-        <div className="flex gap-2">
-          <div className="relative flex-1">
-            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-xs font-bold tracking-widest font-mono pointer-events-none">
-              KG
-            </div>
-            <Input
-              type="number"
-              step="0.1"
-              min="20"
-              max="300"
-              placeholder="00.0"
-              value={weight}
-              onChange={(e) => setWeight(e.target.value)}
-              className="h-12 rounded-none bg-secondary border-border text-lg font-bold pl-10 font-mono tabular-nums focus-visible:ring-1 focus-visible:ring-primary focus-visible:border-primary"
-            />
-          </div>
-          <button
-            type="submit"
-            className="bg-primary text-primary-foreground font-bold uppercase tracking-widest text-xs px-5 hover:bg-foreground transition-colors shrink-0"
-          >
-            Save
-          </button>
-        </div>
-
-        <div className="flex gap-2 items-center">
+    <form onSubmit={handleSubmit} className="glass-card rounded-3xl p-6 space-y-4">
+      <div className="grid grid-cols-2 gap-3">
+        <div className="space-y-2">
+          <label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+            <CalendarDays className="h-3 w-3" />
+            Date
+          </label>
           <Input
             type="date"
             value={date}
             onChange={(e) => setDate(e.target.value)}
+            className="h-12 rounded-2xl bg-secondary/60 border-0 text-sm font-semibold focus-visible:ring-2 focus-visible:ring-primary/40 transition-all"
             max={today}
-            className="h-9 rounded-none bg-secondary border-border text-xs font-mono flex-1 focus-visible:ring-1 focus-visible:ring-primary focus-visible:border-primary"
           />
-          <span className="text-[9px] uppercase tracking-widest text-muted-foreground font-mono">
-            TIMESTAMP
-          </span>
         </div>
-
-        {showNote && (
+        <div className="space-y-2">
+          <label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+            <Weight className="h-3 w-3" />
+            Poids (kg)
+          </label>
           <Input
-            placeholder="// note optionnelle..."
-            value={note}
-            onChange={(e) => setNote(e.target.value)}
-            className="h-9 rounded-none bg-secondary border-border text-xs font-mono animate-fade-in focus-visible:ring-1 focus-visible:ring-accent focus-visible:border-accent"
-            autoFocus
+            type="number"
+            step="0.1"
+            min="20"
+            max="300"
+            placeholder="72.5"
+            value={weight}
+            onChange={(e) => setWeight(e.target.value)}
+            className="h-12 rounded-2xl bg-secondary/60 border-0 text-sm font-black focus-visible:ring-2 focus-visible:ring-primary/40 transition-all"
           />
-        )}
+        </div>
+      </div>
+
+      {showNote && (
+        <Input
+          placeholder="Ex: après sport, à jeun..."
+          value={note}
+          onChange={(e) => setNote(e.target.value)}
+          className="h-11 rounded-2xl bg-secondary/60 border-0 text-sm animate-fade-in focus-visible:ring-2 focus-visible:ring-primary/40"
+          autoFocus
+        />
+      )}
+
+      <div className="flex items-center gap-3 pt-1">
+        <button
+          type="button"
+          onClick={() => setShowNote(!showNote)}
+          className={`flex items-center gap-1.5 px-4 h-11 rounded-2xl text-xs font-bold transition-all ${
+            showNote
+              ? "bg-accent text-accent-foreground"
+              : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+          }`}
+        >
+          <MessageSquare className="h-3.5 w-3.5" />
+          Note
+        </button>
+        <Button
+          type="submit"
+          className="flex-1 h-11 rounded-2xl font-bold text-sm gap-2 gradient-primary text-primary-foreground border-0 shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/40 hover:scale-[1.02] transition-all"
+        >
+          <Plus className="h-4 w-4" strokeWidth={3} />
+          Enregistrer
+        </Button>
       </div>
     </form>
   );
