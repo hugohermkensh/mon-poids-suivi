@@ -3,14 +3,10 @@ import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 
 export default function ThemeToggle() {
-  const [dark, setDark] = useState(true);
-
-  useEffect(() => {
-    const saved = localStorage.getItem("theme");
-    // Default to dark for the cyber-athletic design
-    if (saved === "light") setDark(false);
-    else setDark(true);
-  }, []);
+  const [dark, setDark] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return document.documentElement.classList.contains("dark");
+  });
 
   useEffect(() => {
     const root = document.documentElement;
@@ -23,15 +19,26 @@ export default function ThemeToggle() {
     }
   }, [dark]);
 
+  useEffect(() => {
+    const saved = localStorage.getItem("theme");
+    if (saved === "dark") {
+      setDark(true);
+    } else if (saved === "light") {
+      setDark(false);
+    } else if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+      setDark(true);
+    }
+  }, []);
+
   return (
     <Button
       variant="ghost"
       size="icon"
       onClick={() => setDark(!dark)}
-      className="shrink-0 rounded-none h-8 w-8 hover:bg-secondary hover:text-primary"
-      aria-label="Basculer le thème"
+      className="shrink-0 rounded-2xl h-10 w-10 hover:bg-accent"
+      aria-label="Changer le thème"
     >
-      {dark ? <Sun className="h-3.5 w-3.5" /> : <Moon className="h-3.5 w-3.5" />}
+      {dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
     </Button>
   );
 }

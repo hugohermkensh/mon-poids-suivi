@@ -1,5 +1,6 @@
 import { format, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
+import { Target, Clock } from "lucide-react";
 import { predictGoalDate } from "@/lib/weight-storage";
 import type { WeightEntry } from "@/lib/weight-storage";
 
@@ -17,24 +18,22 @@ export default function GoalPrediction({ entries, goalWeight }: Props) {
   );
 
   return (
-    <div className="panel border-l-2 border-accent p-4">
-      <div className="flex justify-between items-baseline mb-3">
-        <span className="text-[10px] uppercase tracking-[0.2em] text-accent font-mono font-bold">
-          ▸ Prédiction · Cible {goalWeight} KG
-        </span>
-        <span className="text-[9px] uppercase tracking-widest text-muted-foreground font-mono">
-          ETA
-        </span>
-      </div>
-      <div className="flex items-end justify-between">
-        <div className="text-base font-bold text-foreground font-mono uppercase">
-          {format(parseISO(targetDate), "dd MMM yyyy", { locale: fr })}
+    <div className="glow-card rounded-3xl p-5">
+      <div className="flex items-center gap-4">
+        <div className="flex h-12 w-12 items-center justify-center rounded-2xl gradient-primary shadow-lg shadow-primary/30 shrink-0">
+          <Target className="h-5 w-5 text-primary-foreground" />
         </div>
-        <div className="flex items-baseline gap-1">
-          <span className="text-2xl font-extrabold text-accent tabular-nums font-mono">
-            {daysLeft}
-          </span>
-          <span className="text-xs text-accent font-bold uppercase tracking-widest">JOURS</span>
+        <div className="flex-1 min-w-0">
+          <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-primary mb-1">
+            🔮 Prédiction objectif
+          </p>
+          <p className="text-base font-black text-foreground capitalize truncate">
+            {format(parseISO(targetDate), "d MMMM yyyy", { locale: fr })}
+          </p>
+        </div>
+        <div className="flex items-center gap-1.5 px-4 py-2 rounded-2xl bg-primary/10 shrink-0">
+          <Clock className="h-3.5 w-3.5 text-primary" />
+          <span className="text-sm font-black text-primary">{daysLeft}j</span>
         </div>
       </div>
     </div>

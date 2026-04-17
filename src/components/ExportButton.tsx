@@ -56,8 +56,7 @@ function captureChart(chartRef?: React.RefObject<HTMLDivElement>): Promise<strin
     const blob = new Blob([svgData], { type: "image/svg+xml;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     img.onload = () => {
-      // Carbon background to match the cyber-athletic theme
-      ctx.fillStyle = "#0a0a0a";
+      ctx.fillStyle = "#ffffff";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       ctx.drawImage(img, 0, 0, rect.width, rect.height);
       resolve(canvas.toDataURL("image/png"));
@@ -75,12 +74,12 @@ export default function ExportButton({ entries, chartRef, goalWeight, height }: 
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `masse-raw-${new Date().toISOString().split("T")[0]}.csv`;
+    link.download = `suivi-poids-${new Date().toISOString().split("T")[0]}.csv`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
-    toast({ title: "Export CSV terminé" });
+    toast({ title: "Export CSV réussi !" });
   };
 
   const handlePDF = () => {
@@ -90,13 +89,12 @@ export default function ExportButton({ entries, chartRef, goalWeight, height }: 
       return;
     }
 
-    win.document.write(`<html><head><title>MASSE.RAW · Génération...</title><style>
-      body{font-family:'JetBrains Mono',monospace;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;background:#030303;color:#ccff00}
-      .l{text-align:center}
-      .s{width:24px;height:24px;border:2px solid #222;border-top-color:#ccff00;animation:r 0.6s linear infinite;margin:0 auto 16px}
+    win.document.write(`<html><head><title>Chargement...</title><style>
+      body{font-family:-apple-system,sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;background:#f8f7ff}
+      .l{text-align:center;color:#6d5cff}
+      .s{width:32px;height:32px;border:3px solid #e5e7eb;border-top-color:#6d5cff;border-radius:50%;animation:r 0.6s linear infinite;margin:0 auto 12px}
       @keyframes r{to{transform:rotate(360deg)}}
-      p{font-size:10px;text-transform:uppercase;letter-spacing:0.3em;margin:0}
-    </style></head><body><div class="l"><div class="s"></div><p>▸ Génération du rapport...</p></div></body></html>`);
+    </style></head><body><div class="l"><div class="s"></div><p style="font-size:13px;font-weight:600">Génération du rapport...</p></div></body></html>`);
 
     captureChart(chartRef).then((chartImg) => {
       const stats = getStats(entries);
@@ -106,10 +104,10 @@ export default function ExportButton({ entries, chartRef, goalWeight, height }: 
       win.document.open();
       win.document.write(buildPDFHtml(entries, stats, bmi, bmiCat, goalWeight, chartImg));
       win.document.close();
-      setTimeout(() => win.print(), 500);
+      setTimeout(() => win.print(), 400);
     });
 
-    toast({ title: "Compilation du rapport..." });
+    toast({ title: "Rapport en préparation..." });
   };
 
   if (entries.length === 0) return null;
@@ -117,19 +115,19 @@ export default function ExportButton({ entries, chartRef, goalWeight, height }: 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="shrink-0 rounded-none h-8 w-8 hover:bg-secondary hover:text-primary" aria-label="Exporter">
-          <Download className="h-3.5 w-3.5" />
+        <Button variant="ghost" size="icon" className="shrink-0 rounded-2xl h-10 w-10 hover:bg-accent" aria-label="Exporter">
+          <Download className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="min-w-[180px] rounded-none border-primary/30 bg-card font-mono">
-        <DropdownMenuItem onClick={handleCSV} className="gap-2.5 rounded-none text-xs uppercase tracking-widest focus:bg-secondary focus:text-primary">
-          <Table2 className="h-3.5 w-3.5" />
-          Export CSV
+      <DropdownMenuContent align="end" className="min-w-[180px] rounded-2xl">
+        <DropdownMenuItem onClick={handleCSV} className="gap-2.5 rounded-xl">
+          <Table2 className="h-4 w-4 text-muted-foreground" />
+          Exporter CSV
         </DropdownMenuItem>
-        <DropdownMenuSeparator className="bg-border" />
-        <DropdownMenuItem onClick={handlePDF} className="gap-2.5 rounded-none text-xs uppercase tracking-widest focus:bg-secondary focus:text-primary">
-          <FileText className="h-3.5 w-3.5" />
-          Export PDF
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={handlePDF} className="gap-2.5 rounded-xl">
+          <FileText className="h-4 w-4 text-muted-foreground" />
+          Imprimer / PDF
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
@@ -144,136 +142,107 @@ function buildPDFHtml(
   goalWeight: number | undefined,
   chartImg: string
 ) {
-  const dateStr = format(new Date(), "dd MMM yyyy", { locale: fr }).toUpperCase();
-  const timeStr = format(new Date(), "dd/MM/yyyy HH:mm", { locale: fr });
+  const dateStr = format(new Date(), "d MMMM yyyy", { locale: fr });
+  const timeStr = format(new Date(), "dd/MM/yyyy 'à' HH:mm", { locale: fr });
 
   return `<!DOCTYPE html>
-<html lang="fr"><head><meta charset="utf-8"><title>MASSE.RAW · Rapport ${dateStr}</title>
+<html lang="fr"><head><meta charset="utf-8"><title>WeightTrack — Rapport</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700;800&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800;900&display=swap');
   *{margin:0;padding:0;box-sizing:border-box}
-  body{font-family:'Chakra Petch',-apple-system,sans-serif;color:#fff;background:#030303;max-width:720px;margin:0 auto;padding:48px 40px;min-height:100vh}
-  .mono{font-family:'JetBrains Mono',monospace}
+  body{font-family:'DM Sans',-apple-system,sans-serif;color:#1a1a2e;background:#fff;max-width:700px;margin:0 auto;padding:48px}
 
-  .header{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:32px;padding-bottom:18px;border-bottom:2px solid #ccff00}
-  .brand-tag{font-family:'JetBrains Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:0.3em;color:#00f3ff;font-weight:700;margin-bottom:6px}
-  .brand-name{font-size:28px;font-weight:700;text-transform:uppercase;letter-spacing:-0.5px;line-height:1}
-  .brand-name .dot{color:#ccff00}
-  .meta{text-align:right;font-family:'JetBrains Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:0.2em;color:#888}
-  .meta strong{color:#ccff00;font-weight:700;display:block;font-size:11px;margin-top:4px}
+  .header{display:flex;align-items:center;gap:20px;margin-bottom:40px;padding-bottom:28px;border-bottom:3px solid #7c5cff}
+  .logo-box{width:52px;height:52px;background:linear-gradient(135deg,#7c5cff,#a78bfa);border-radius:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 8px 24px rgba(124,92,255,0.35)}
+  .logo-box svg{width:24px;height:24px;stroke:white;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .header h1{font-size:24px;font-weight:900;color:#1a1a2e;letter-spacing:-0.5px}
+  .header p{font-size:12px;color:#6b7280;margin-top:4px;font-weight:500}
 
-  .section-label{font-family:'JetBrains Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:0.3em;color:#888;margin:28px 0 12px;display:flex;align-items:center;gap:10px}
-  .section-label::before{content:'▸';color:#ccff00}
-  .section-label::after{content:'';flex:1;height:1px;background:#222}
+  .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:36px}
+  .stat-card{background:#f8f7ff;border:1px solid #e8e6ff;border-radius:16px;padding:18px}
+  .stat-label{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1.2px;color:#9ca3af;margin-bottom:8px}
+  .stat-value{font-size:26px;font-weight:900;color:#1a1a2e;letter-spacing:-0.5px}
+  .stat-unit{font-size:11px;font-weight:600;color:#9ca3af}
+  .stat-sub{font-size:10px;font-weight:700;margin-top:6px}
+  .green{color:#22c55e} .red{color:#ef4444} .gray{color:#9ca3af}
 
-  .hero{background:#0a0a0a;border-left:3px solid #ccff00;padding:24px;position:relative;overflow:hidden;box-shadow:inset 0 0 30px rgba(0,0,0,0.5)}
-  .hero-row{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px}
-  .hero-label{font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.3em;color:#888}
-  .hero-status{font-family:'JetBrains Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:0.2em;padding:2px 8px;border:1px solid;display:inline-block}
-  .status-up{color:#ccff00;background:rgba(204,255,0,0.1);border-color:rgba(204,255,0,0.3)}
-  .status-down{color:#ff2a2a;background:rgba(255,42,42,0.1);border-color:rgba(255,42,42,0.3)}
-  .hero-value{font-family:'JetBrains Mono',monospace;font-size:64px;font-weight:800;letter-spacing:-2px;line-height:1;margin:8px 0 20px;display:flex;align-items:baseline;gap:10px}
-  .hero-value .unit{font-size:18px;color:#ccff00;font-weight:700;letter-spacing:3px}
+  .section-title{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:2px;color:#7c5cff;margin:36px 0 18px;display:flex;align-items:center;gap:14px}
+  .section-title::after{content:'';flex:1;height:1px;background:#e8e6ff}
 
-  .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border-top:1px solid #222;padding-top:18px}
-  .cell{padding:0 16px;border-right:1px solid #222}
-  .cell:first-child{padding-left:0}
-  .cell:last-child{padding-right:0;border-right:none}
-  .cell-label{font-family:'JetBrains Mono',monospace;font-size:8px;text-transform:uppercase;letter-spacing:0.2em;color:#888;margin-bottom:6px}
-  .cell-value{font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;letter-spacing:-0.5px;color:#fff}
-  .cell-value.lime{color:#ccff00}
-  .cell-value.red{color:#ff2a2a}
-  .cell-sub{font-family:'JetBrains Mono',monospace;font-size:8px;text-transform:uppercase;letter-spacing:0.2em;color:#666;margin-top:4px}
+  .chart-box{margin-bottom:36px;background:#f8f7ff;border:1px solid #e8e6ff;border-radius:20px;padding:24px;overflow:hidden}
+  .chart-box img{width:100%;display:block;border-radius:12px}
 
-  .chart-box{background:#0a0a0a;border:1px solid #222;padding:16px;margin-bottom:16px}
-  .chart-box img{width:100%;display:block}
-
-  table{width:100%;border-collapse:collapse;font-family:'JetBrains Mono',monospace;font-size:11px;background:#0a0a0a;border:1px solid #222}
-  thead{background:#141414;border-bottom:2px solid #ccff00}
-  th{color:#ccff00;padding:10px 16px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.2em;text-align:left}
-  th.right{text-align:right}
-  td{padding:9px 16px;border-bottom:1px solid #1a1a1a;color:#ddd}
-  td.right{text-align:right;font-weight:700;color:#fff}
-  td.delta-up{color:#ccff00;font-weight:700}
-  td.delta-down{color:#ff2a2a;font-weight:700}
-  td.delta-zero{color:#666}
+  table{width:100%;border-collapse:separate;border-spacing:0;border-radius:16px;overflow:hidden;border:1px solid #e8e6ff;font-size:12px}
+  thead{background:linear-gradient(135deg,#7c5cff,#a78bfa)}
+  th{color:white;padding:14px 20px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;text-align:left}
+  td{padding:12px 20px;border-bottom:1px solid #f3f4f6}
+  tr:nth-child(even){background:#faf9ff}
   tr:last-child td{border-bottom:none}
+  .w-col{font-weight:800;color:#1a1a2e}
 
-  .footer{margin-top:36px;padding-top:18px;border-top:1px solid #222;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',monospace;font-size:8px;text-transform:uppercase;letter-spacing:0.3em;color:#555}
-  .footer .brand{color:#ccff00;font-weight:700}
+  .footer{margin-top:40px;padding-top:20px;border-top:1px solid #e8e6ff;display:flex;justify-content:space-between;align-items:center}
+  .footer p{font-size:9px;color:#9ca3af;font-weight:500}
+  .footer .brand{color:#7c5cff;font-weight:900}
 
-  @media print{
-    body{padding:24px 28px;max-width:none;background:#030303;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-    table{page-break-inside:auto}
-    tr{page-break-inside:avoid}
-    .chart-box{break-inside:avoid}
-    .hero{break-inside:avoid}
-  }
+  @media print{body{padding:20px 24px;max-width:none;-webkit-print-color-adjust:exact;print-color-adjust:exact}table{page-break-inside:auto}tr{page-break-inside:avoid}.chart-box{break-inside:avoid}}
 </style></head><body>
 
 <div class="header">
-  <div>
-    <div class="brand-tag">▸ Télémétrie Corporelle</div>
-    <h1 class="brand-name">MASSE<span class="dot">.</span>RAW</h1>
+  <div class="logo-box">
+    <svg viewBox="0 0 24 24"><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="M7 21h10"/><path d="M12 3v18"/><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/></svg>
   </div>
-  <div class="meta">
-    Rapport ${dateStr}<br>
-    <strong>${entries.length.toString().padStart(3, "0")} ENTRÉES</strong>
+  <div>
+    <h1>WeightTrack</h1>
+    <p>Rapport du ${dateStr} · ${entries.length} pesée${entries.length !== 1 ? "s" : ""}</p>
   </div>
 </div>
 
 ${stats ? `
-<div class="hero">
-  <div class="hero-row">
-    <div class="hero-label">Poids Actuel</div>
-    <span class="hero-status ${stats.diff <= 0 ? 'status-up' : 'status-down'}">${stats.diff <= 0 ? 'OPTIMAL' : 'HAUSSE'}</span>
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-label">Actuel</div>
+    <div class="stat-value">${stats.current.toFixed(1)} <span class="stat-unit">kg</span></div>
+    <div class="stat-sub ${stats.diff <= 0 ? 'green' : 'red'}">${stats.diff > 0 ? '+' : ''}${stats.diff.toFixed(1)} kg</div>
   </div>
-  <div class="hero-value">${stats.current.toFixed(1)} <span class="unit">KG</span></div>
-  <div class="grid">
-    <div class="cell">
-      <div class="cell-label">Delta</div>
-      <div class="cell-value ${stats.diff <= 0 ? 'lime' : 'red'}">${stats.diff > 0 ? '+' : ''}${stats.diff.toFixed(1)}</div>
-      <div class="cell-sub">KG</div>
-    </div>
-    <div class="cell">
-      <div class="cell-label">Moyenne</div>
-      <div class="cell-value">${stats.avg.toFixed(1)}</div>
-      <div class="cell-sub">KG</div>
-    </div>
-    <div class="cell">
-      <div class="cell-label">Amplitude</div>
-      <div class="cell-value">${(stats.max - stats.min).toFixed(1)}</div>
-      <div class="cell-sub">${stats.min.toFixed(1)} → ${stats.max.toFixed(1)}</div>
-    </div>
-    <div class="cell">
-      <div class="cell-label">${bmi ? 'IMC' : (goalWeight ? 'Cible' : 'Max')}</div>
-      <div class="cell-value ${bmiCat?.label === 'Normal' ? 'lime' : ''}">${bmi ? bmi.toFixed(1) : (goalWeight ? goalWeight.toFixed(1) : stats.max.toFixed(1))}</div>
-      <div class="cell-sub">${bmiCat ? bmiCat.label : (goalWeight ? `${(stats.current - goalWeight) > 0 ? '+' : ''}${(stats.current - goalWeight).toFixed(1)} restant` : 'KG')}</div>
-    </div>
+  <div class="stat-card">
+    <div class="stat-label">Moyenne</div>
+    <div class="stat-value">${stats.avg.toFixed(1)} <span class="stat-unit">kg</span></div>
+    <div class="stat-sub gray">${entries.length} pesées</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Amplitude</div>
+    <div class="stat-value">${(stats.max - stats.min).toFixed(1)} <span class="stat-unit">kg</span></div>
+    <div class="stat-sub gray">${stats.min.toFixed(1)} → ${stats.max.toFixed(1)}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">${bmi ? 'IMC' : (goalWeight ? 'Objectif' : 'Max')}</div>
+    <div class="stat-value">${bmi ? bmi.toFixed(1) : (goalWeight ? goalWeight.toFixed(1) : stats.max.toFixed(1))} <span class="stat-unit">${bmi ? '' : 'kg'}</span></div>
+    <div class="stat-sub ${bmiCat ? (bmiCat.label === 'Normal' ? 'green' : 'red') : 'gray'}">${bmiCat ? bmiCat.label : (goalWeight ? `${(stats.current - goalWeight) > 0 ? '+' : ''}${(stats.current - goalWeight).toFixed(1)} kg restant` : '')}</div>
   </div>
 </div>` : ''}
 
 ${chartImg ? `
-<div class="section-label">Volume de Masse</div>
+<div class="section-title">Évolution</div>
 <div class="chart-box"><img src="${chartImg}" alt="Graphique" /></div>` : ''}
 
-<div class="section-label">Registre Brut</div>
+<div class="section-title">Historique</div>
 <table>
-  <thead><tr><th>Date</th><th class="right">Poids</th><th class="right">Delta</th></tr></thead>
+  <thead><tr><th>Date</th><th>Poids</th><th>Variation</th></tr></thead>
   <tbody>
     ${[...entries].reverse().map((e, i, arr) => {
       const prev = arr[i + 1];
       const diff = prev ? e.weight - prev.weight : 0;
-      const cls = !prev ? 'delta-zero' : (diff <= 0 ? 'delta-up' : 'delta-down');
-      const str = !prev ? '—' : `${diff > 0 ? '+' : ''}${diff.toFixed(1)}`;
-      return `<tr><td>${format(parseISO(e.date), "dd MMM yyyy", { locale: fr }).toUpperCase()}</td><td class="right">${e.weight.toFixed(1)} KG</td><td class="right ${cls}">${str}</td></tr>`;
+      const cls = !prev ? 'gray' : (diff <= 0 ? 'green' : 'red');
+      const sym = !prev ? '—' : (diff > 0 ? '↑' : diff < 0 ? '↓' : '→');
+      const str = !prev ? '—' : `${sym} ${Math.abs(diff).toFixed(1)} kg`;
+      return `<tr><td>${format(parseISO(e.date), "d MMM yyyy", { locale: fr })}</td><td class="w-col">${e.weight.toFixed(1)} kg</td><td class="${cls}">${str}</td></tr>`;
     }).join("")}
   </tbody>
 </table>
 
 <div class="footer">
-  <span><span class="brand">MASSE.RAW</span> · Rapport généré automatiquement</span>
-  <span>${timeStr}</span>
+  <p><span class="brand">WeightTrack</span> · Rapport généré automatiquement</p>
+  <p>${timeStr}</p>
 </div>
 
 </body></html>`;

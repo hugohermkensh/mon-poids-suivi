@@ -1,4 +1,5 @@
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback, useRef } from "react";
+import { Scale, Sparkles } from "lucide-react";
 import {
   getEntries,
   addEntry,
@@ -21,13 +22,7 @@ import GoalPrediction from "@/components/GoalPrediction";
 const Index = () => {
   const [entries, setEntries] = useState(getEntries);
   const [settings, setSettings] = useState<UserSettings>(getSettings);
-  const [time, setTime] = useState(() => new Date());
   const chartRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const id = setInterval(() => setTime(new Date()), 1000);
-    return () => clearInterval(id);
-  }, []);
 
   const refresh = useCallback(() => setEntries(getEntries()), []);
 
@@ -52,105 +47,91 @@ const Index = () => {
   };
 
   const stats = getStats(entries);
-  const timeStr = time.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
 
   return (
-    <div className="min-h-screen bg-background relative overflow-x-hidden">
-      {/* Subtle grid backdrop */}
-      <div className="pointer-events-none fixed inset-0 grid-bg opacity-[0.35]" />
-      <div className="pointer-events-none fixed inset-0 bg-gradient-to-b from-background via-transparent to-background" />
+    <div className="min-h-screen bg-background relative">
+      {/* Subtle gradient orbs */}
+      <div className="pointer-events-none fixed inset-0 overflow-hidden">
+        <div className="absolute -top-48 -right-48 w-[520px] h-[520px] rounded-full bg-primary/[0.06] blur-[110px]" />
+        <div className="absolute -bottom-48 -left-48 w-[420px] h-[420px] rounded-full bg-[hsl(var(--primary-glow))]/[0.05] blur-[110px]" />
+        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[300px] h-[300px] rounded-full bg-primary/[0.03] blur-[100px]" />
+      </div>
 
-      <div className="relative mx-auto max-w-md">
-        {/* Top status bar */}
-        <div className="border-b border-border bg-card/80 backdrop-blur-xl sticky top-0 z-30">
-          <div className="px-5 pt-6 pb-4 flex justify-between items-end">
-            <div>
-              <div className="text-[9px] uppercase tracking-[0.3em] text-accent font-bold mb-1 font-mono">
-                Télémétrie Corporelle
-              </div>
-              <h1 className="text-2xl font-bold uppercase tracking-tight text-foreground leading-none">
-                Masse<span className="text-primary">.</span>RAW
-              </h1>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="text-right">
-                <div className="text-[9px] uppercase tracking-widest text-muted-foreground font-mono">
-                  {entries.length} log{entries.length !== 1 ? "s" : ""}
+      <div className="relative mx-auto max-w-md px-5 py-10 space-y-8">
+        {/* Header */}
+        <header className="animate-slide-up">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="relative">
+                <div className="flex h-14 w-14 items-center justify-center rounded-2xl gradient-primary shadow-xl shadow-primary/30">
+                  <Scale className="h-6 w-6 text-primary-foreground" strokeWidth={2.5} />
                 </div>
-                <div className="text-[10px] font-mono text-foreground tabular-nums">
-                  {timeStr}
+                <div className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-accent border-2 border-background animate-float">
+                  <Sparkles className="h-2.5 w-2.5 text-accent-foreground" />
                 </div>
               </div>
-              <div className="size-2 bg-primary animate-pulse-neon" aria-label="sync" />
+              <div>
+                <h1 className="text-2xl font-black tracking-tight text-foreground">
+                  Weight<span className="text-gradient">Track</span>
+                </h1>
+                <p className="text-sm text-muted-foreground mt-0.5 font-medium">
+                  {entries.length === 0
+                    ? "Commencez votre suivi"
+                    : `${entries.length} pesée${entries.length !== 1 ? "s" : ""}`}
+                </p>
+              </div>
             </div>
-          </div>
-          <div className="px-5 pb-2 flex items-center justify-between border-t border-border/50 pt-2">
-            <span className="text-[9px] uppercase tracking-[0.2em] text-muted-foreground font-mono">
-              SYS · OPÉRATIONNEL
-            </span>
             <div className="flex items-center gap-1">
               <ExportButton entries={entries} chartRef={chartRef} goalWeight={settings.goalWeight} height={settings.height} />
               <SettingsDialog settings={settings} onSave={handleSaveSettings} />
               <ThemeToggle />
             </div>
           </div>
+        </header>
+
+        {/* Form */}
+        <div className="animate-slide-up" style={{ animationDelay: "80ms" }}>
+          <WeightForm onAdd={handleAdd} />
         </div>
 
-        <main className="px-4 py-5 space-y-5 pb-16">
-          {/* Stats hero */}
-          <div className="animate-slide-up">
-            <StatsCards stats={stats} goalWeight={settings.goalWeight} height={settings.height} />
-          </div>
+        {/* Stats */}
+        <div className="animate-slide-up" style={{ animationDelay: "160ms" }}>
+          <StatsCards stats={stats} goalWeight={settings.goalWeight} height={settings.height} />
+        </div>
 
-          {/* Form */}
-          <div className="animate-slide-up" style={{ animationDelay: "60ms" }}>
-            <WeightForm onAdd={handleAdd} />
-          </div>
-
-          {/* Goal Prediction */}
-          {settings.goalWeight && entries.length >= 7 && (
-            <div className="animate-slide-up" style={{ animationDelay: "120ms" }}>
-              <GoalPrediction entries={entries} goalWeight={settings.goalWeight} />
-            </div>
-          )}
-
-          {/* Chart */}
-          <div className="animate-slide-up" style={{ animationDelay: "180ms" }}>
-            <section ref={chartRef} className="panel p-4">
-              <div className="flex justify-between items-baseline mb-4 pb-2 border-b border-border">
-                <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground font-mono">
-                  ▸ Volume de Masse
-                </h2>
-                <span className="text-[9px] text-primary font-mono uppercase tracking-widest">
-                  LIVE
-                </span>
-              </div>
-              <WeightChart entries={entries} goalWeight={settings.goalWeight} />
-            </section>
-          </div>
-
-          {/* History */}
+        {/* Goal Prediction */}
+        {settings.goalWeight && entries.length >= 7 && (
           <div className="animate-slide-up" style={{ animationDelay: "240ms" }}>
-            <section className="panel">
-              <div className="px-4 py-3 border-b border-border flex justify-between items-center">
-                <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground font-mono">
-                  ▸ Registre Brut
-                </h2>
-                <span className="text-[9px] font-mono text-muted-foreground tabular-nums">
-                  {entries.length.toString().padStart(3, "0")}
-                </span>
-              </div>
-              <WeightHistory entries={entries} onDelete={handleDelete} onEdit={handleEdit} />
-            </section>
+            <GoalPrediction entries={entries} goalWeight={settings.goalWeight} />
           </div>
+        )}
 
-          {/* Footer */}
-          <footer className="text-center pt-6 animate-fade-in" style={{ animationDelay: "320ms" }}>
-            <p className="text-[9px] text-muted-foreground/60 font-mono uppercase tracking-[0.2em]">
-              Données locales · MASSE.RAW v2.0
-            </p>
-          </footer>
-        </main>
+        {/* Chart */}
+        <div className="animate-slide-up" style={{ animationDelay: "320ms" }}>
+          <section ref={chartRef} className="glass-card rounded-3xl p-6">
+            <h2 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-5">
+              📊 Évolution
+            </h2>
+            <WeightChart entries={entries} goalWeight={settings.goalWeight} />
+          </section>
+        </div>
+
+        {/* History */}
+        <div className="animate-slide-up" style={{ animationDelay: "400ms" }}>
+          <section>
+            <h2 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-4 px-1">
+              📋 Historique
+            </h2>
+            <WeightHistory entries={entries} onDelete={handleDelete} onEdit={handleEdit} />
+          </section>
+        </div>
+
+        {/* Footer */}
+        <footer className="text-center pb-10 pt-4 animate-fade-in" style={{ animationDelay: "500ms" }}>
+          <p className="text-xs text-muted-foreground/40 font-medium">
+            Données stockées localement · WeightTrack
+          </p>
+        </footer>
       </div>
     </div>
   );
