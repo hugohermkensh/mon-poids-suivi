@@ -1,4 +1,3 @@
-import { TrendingDown, TrendingUp, Scale, Activity, Target, Heart } from "lucide-react";
 import { calculateBMI, getBMICategory } from "@/lib/weight-storage";
 
 interface Stats {
@@ -18,13 +17,16 @@ interface Props {
 export default function StatsCards({ stats, goalWeight, height }: Props) {
   if (!stats) {
     return (
-      <div className="grid grid-cols-2 gap-3">
-        {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="glass-card rounded-3xl p-5 animate-pulse">
-            <div className="h-2 w-14 rounded-full bg-muted mb-5" />
-            <div className="h-7 w-14 rounded-lg bg-muted" />
-          </div>
-        ))}
+      <div className="panel-accent p-6">
+        <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground font-mono mb-2">
+          Aucune donnée
+        </div>
+        <div className="text-3xl font-extrabold font-mono text-muted-foreground/40">
+          —.— <span className="text-base text-primary">KG</span>
+        </div>
+        <p className="text-xs text-muted-foreground/70 mt-3 font-mono">
+          Ajoutez votre première pesée ci-dessous.
+        </p>
       </div>
     );
   }
@@ -32,94 +34,104 @@ export default function StatsCards({ stats, goalWeight, height }: Props) {
   const bmi = height ? calculateBMI(stats.current, height) : null;
   const bmiCategory = bmi ? getBMICategory(bmi) : null;
   const goalDiff = goalWeight ? stats.current - goalWeight : null;
-
-  const cards = [
-    {
-      label: "Actuel",
-      value: stats.current.toFixed(1),
-      unit: "kg",
-      icon: Scale,
-      featured: true,
-      emoji: "⚡",
-      sub: stats.diff !== 0 ? `${stats.diff > 0 ? "+" : ""}${stats.diff.toFixed(1)} kg` : null,
-      subPositive: stats.diff <= 0,
-    },
-    ...(bmi && bmiCategory
-      ? [{
-          label: "IMC",
-          value: bmi.toFixed(1),
-          icon: Heart,
-          emoji: "❤️",
-          sub: bmiCategory.label,
-          subClassName: bmiCategory.color,
-        }]
-      : [{
-          label: "Moyenne",
-          value: stats.avg.toFixed(1),
-          unit: "kg",
-          icon: Activity,
-          emoji: "📊",
-        }]),
-    ...(goalWeight && goalDiff !== null
-      ? [{
-          label: "Objectif",
-          value: goalWeight.toFixed(1),
-          unit: "kg",
-          icon: Target,
-          emoji: "🎯",
-          sub: `${goalDiff > 0 ? "+" : ""}${goalDiff.toFixed(1)} kg restant`,
-          subPositive: goalDiff <= 0,
-        }]
-      : [{
-          label: "Minimum",
-          value: stats.min.toFixed(1),
-          unit: "kg",
-          icon: TrendingDown,
-          emoji: "📉",
-        }]),
-    {
-      label: bmi ? "Moyenne" : "Maximum",
-      value: bmi ? stats.avg.toFixed(1) : stats.max.toFixed(1),
-      unit: "kg",
-      icon: bmi ? Activity : TrendingUp,
-      emoji: bmi ? "📊" : "📈",
-    },
-  ];
+  const status = stats.diff <= 0 ? "Optimal" : "Hausse";
 
   return (
-    <div className="grid grid-cols-2 gap-3">
-      {cards.map((c: any) => (
-        <div
-          key={c.label}
-          className={`rounded-3xl p-5 transition-all hover:scale-[1.02] ${
-            c.featured
-              ? "glow-card"
-              : "glass-card"
-          }`}
-        >
-          <div className="flex items-center justify-between mb-4">
-            <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground">
-              {c.label}
-            </span>
-            <span className="text-base">{c.emoji}</span>
-          </div>
-          <div className="flex items-baseline gap-1.5">
-            <span className="text-3xl font-black text-foreground tracking-tight">
-              {c.value}
-            </span>
-            {c.unit && (
-              <span className="text-sm font-bold text-muted-foreground">{c.unit}</span>
-            )}
-          </div>
-          {c.sub && (
-            <p className={`text-xs font-bold mt-2 ${
-              c.subClassName || (c.subPositive ? "text-stat-up" : "text-stat-down")
-            }`}>
-              {c.sub}
-            </p>
-          )}
+    <div className="panel-accent p-5">
+      {/* corner decoration */}
+      <div className="absolute -right-12 -top-12 size-32 bg-primary/5 rotate-45 pointer-events-none border border-primary/10" />
+
+      <div className="flex justify-between items-start mb-2 relative z-10">
+        <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground font-mono">
+          Poids Actuel
         </div>
-      ))}
+        <div className={`text-[10px] uppercase tracking-widest font-mono px-2 py-0.5 border ${
+          stats.diff <= 0
+            ? "text-primary bg-primary/10 border-primary/20"
+            : "text-destructive bg-destructive/10 border-destructive/30"
+        }`}>
+          {status}
+        </div>
+      </div>
+
+      <div className="flex items-baseline gap-2 mb-6 relative z-10">
+        <span className="text-7xl font-extrabold tracking-tighter text-foreground tabular-nums font-mono">
+          {stats.current.toFixed(1)}
+        </span>
+        <span className="text-xl text-primary font-bold tracking-widest">KG</span>
+      </div>
+
+      {/* Grid Stats */}
+      <div className="grid grid-cols-2 gap-x-4 gap-y-4 border-t border-border pt-4 relative z-10">
+        <Cell
+          label={`Delta`}
+          value={`${stats.diff > 0 ? "+" : ""}${stats.diff.toFixed(1)} KG`}
+          tone={stats.diff <= 0 ? "primary" : "destructive"}
+        />
+        <Cell
+          label="Moyenne"
+          value={`${stats.avg.toFixed(1)} KG`}
+        />
+        {goalWeight && goalDiff !== null ? (
+          <Cell
+            label="Cible"
+            value={`${goalWeight.toFixed(1)} KG`}
+            sub={`${goalDiff > 0 ? "+" : ""}${goalDiff.toFixed(1)} restant`}
+          />
+        ) : (
+          <Cell
+            label="Min"
+            value={`${stats.min.toFixed(1)} KG`}
+          />
+        )}
+        {bmi && bmiCategory ? (
+          <Cell
+            label="IMC"
+            value={bmi.toFixed(1)}
+            sub={bmiCategory.label}
+            tone={bmiCategory.label === "Normal" ? "primary" : "warning"}
+          />
+        ) : (
+          <Cell
+            label="Max"
+            value={`${stats.max.toFixed(1)} KG`}
+          />
+        )}
+      </div>
+    </div>
+  );
+}
+
+function Cell({
+  label,
+  value,
+  sub,
+  tone = "default",
+}: {
+  label: string;
+  value: string;
+  sub?: string;
+  tone?: "default" | "primary" | "destructive" | "warning";
+}) {
+  const toneClass =
+    tone === "primary"
+      ? "text-primary"
+      : tone === "destructive"
+        ? "text-destructive"
+        : tone === "warning"
+          ? "text-[hsl(var(--stat-warning))]"
+          : "text-foreground";
+  return (
+    <div>
+      <div className="text-[9px] text-muted-foreground uppercase tracking-widest mb-1 font-mono">
+        {label}
+      </div>
+      <div className={`text-lg font-bold tabular-nums font-mono ${toneClass}`}>{value}</div>
+      {sub && (
+        <div className="text-[9px] text-muted-foreground uppercase tracking-widest mt-0.5 font-mono">
+          {sub}
+        </div>
+      )}
     </div>
   );
 }

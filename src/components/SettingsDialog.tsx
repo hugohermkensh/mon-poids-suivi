@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Settings, Target, Ruler } from "lucide-react";
+import { Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -31,63 +31,59 @@ export default function SettingsDialog({ settings, onSave }: Props) {
       height: !isNaN(h) && h > 0 ? h : undefined,
     });
     setOpen(false);
-    toast({ title: "Paramètres sauvegardés ✓" });
+    toast({ title: "Configuration sauvegardée" });
   };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="ghost" size="icon" className="shrink-0 rounded-2xl h-10 w-10" aria-label="Paramètres">
-          <Settings className="h-4 w-4" />
+        <Button variant="ghost" size="icon" className="shrink-0 rounded-none h-8 w-8 hover:bg-secondary hover:text-primary" aria-label="Configuration">
+          <Settings className="h-3.5 w-3.5" />
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-sm rounded-3xl">
+      <DialogContent className="max-w-sm rounded-none border-primary/30 bg-card">
         <DialogHeader>
-          <DialogTitle className="text-xl font-black">⚙️ Paramètres</DialogTitle>
+          <DialogTitle className="text-base font-bold uppercase tracking-widest font-mono text-primary">
+            ▸ Configuration
+          </DialogTitle>
         </DialogHeader>
-        <div className="space-y-5 pt-3">
-          <div className="space-y-2">
-            <Label className="flex items-center gap-2 text-xs font-bold text-muted-foreground">
-              <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-primary/10">
-                <Target className="h-3.5 w-3.5 text-primary" />
-              </div>
-              Poids objectif (kg)
+        <div className="space-y-4 pt-2">
+          <div className="space-y-1.5">
+            <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground font-mono">
+              Poids Cible (KG)
             </Label>
             <Input
               type="number"
               step="0.1"
               min="30"
               max="300"
-              placeholder="Ex: 70"
+              placeholder="00.0"
               value={goalWeight}
               onChange={(e) => setGoalWeight(e.target.value)}
-              className="h-12 rounded-2xl bg-secondary/50 border-0"
+              className="h-11 rounded-none bg-secondary border-border font-mono tabular-nums focus-visible:border-primary focus-visible:ring-0"
             />
           </div>
-          <div className="space-y-2">
-            <Label className="flex items-center gap-2 text-xs font-bold text-muted-foreground">
-              <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-primary/10">
-                <Ruler className="h-3.5 w-3.5 text-primary" />
-              </div>
-              Taille (cm)
+          <div className="space-y-1.5">
+            <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground font-mono">
+              Taille (CM)
             </Label>
             <Input
               type="number"
               step="1"
               min="100"
               max="250"
-              placeholder="Ex: 175"
+              placeholder="000"
               value={height}
               onChange={(e) => setHeight(e.target.value)}
-              className="h-12 rounded-2xl bg-secondary/50 border-0"
+              className="h-11 rounded-none bg-secondary border-border font-mono tabular-nums focus-visible:border-primary focus-visible:ring-0"
             />
           </div>
-          <Button
+          <button
             onClick={handleSave}
-            className="w-full h-12 rounded-2xl font-bold shadow-lg shadow-primary/20"
+            className="w-full h-11 bg-primary text-primary-foreground font-bold uppercase tracking-widest text-xs hover:bg-foreground transition-colors"
           >
             Enregistrer
-          </Button>
+          </button>
         </div>
       </DialogContent>
     </Dialog>

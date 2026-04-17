@@ -20,22 +20,27 @@ export default function DeleteConfirmDialog({ onConfirm }: Props) {
     <AlertDialog>
       <AlertDialogTrigger asChild>
         <button
-          className="h-8 w-8 rounded-xl flex items-center justify-center text-muted-foreground/40 hover:text-destructive hover:bg-destructive/10 transition-all"
+          className="h-7 w-7 flex items-center justify-center text-muted-foreground/50 hover:text-destructive hover:bg-secondary transition-all"
           aria-label="Supprimer"
         >
-          <Trash2 className="h-3.5 w-3.5" />
+          <Trash2 className="h-3 w-3" />
         </button>
       </AlertDialogTrigger>
-      <AlertDialogContent className="max-w-sm rounded-3xl">
+      <AlertDialogContent className="max-w-sm rounded-none border-destructive/40 bg-card">
         <AlertDialogHeader>
-          <AlertDialogTitle className="font-black text-lg">🗑️ Supprimer cette entrée ?</AlertDialogTitle>
-          <AlertDialogDescription>
-            Cette action est irréversible.
+          <AlertDialogTitle className="font-bold text-base uppercase tracking-widest font-mono text-destructive">
+            ▸ Suppression
+          </AlertDialogTitle>
+          <AlertDialogDescription className="font-mono text-xs">
+            Cette opération est irréversible. Confirmer la suppression de l'entrée ?
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel className="rounded-2xl">Annuler</AlertDialogCancel>
-          <AlertDialogAction onClick={onConfirm} className="rounded-2xl bg-destructive hover:bg-destructive/90">
+          <AlertDialogCancel className="rounded-none font-mono uppercase tracking-widest text-xs">Annuler</AlertDialogCancel>
+          <AlertDialogAction
+            onClick={onConfirm}
+            className="rounded-none bg-destructive hover:bg-destructive/90 font-mono uppercase tracking-widest text-xs"
+          >
             Supprimer
           </AlertDialogAction>
         </AlertDialogFooter>
